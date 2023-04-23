@@ -2,17 +2,30 @@ import { z } from 'zod'
 import { adminProcedure, createTRPCRouter, publicProcedure } from '../trpc'
 import { bookBase } from '~/schemes/base/bookBase.scheme'
 
-const addBookSchema = z.object(bookBase)
+export const addBookSchema = z.object({
+    title: bookBase.title,
+    coverImageUrl: bookBase.coverImageUrl,
+    price: bookBase.price,
+    pages: bookBase.pages,
+    stock: bookBase.stock,
+    description: bookBase.description,
+    publishedAt: bookBase.publishedAt,
+    publisherId: bookBase.publisherId,
+    authorsIds: bookBase.authorsIds,
+    categoriesIds: bookBase.categoriesIds,
+    format: bookBase.format,
+    coverType: bookBase.coverType,
+})
 
-const addBooksSchema = z.object({
+export const addBooksSchema = z.object({
     books: addBookSchema.array(),
 })
 
-const getBookByIdSchema = z.object({
+export const getBookByIdSchema = z.object({
     id: bookBase.id,
 })
 
-const getBestSellersSchema = z.object({
+export const getBestSellersSchema = z.object({
     lastDays: z.number().int().positive(),
     take: z.number().int().positive(),
 })
