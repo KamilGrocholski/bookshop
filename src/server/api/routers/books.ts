@@ -1,51 +1,6 @@
 import { z } from 'zod'
-import { createTRPCRouter, publicProcedure } from '../trpc'
-import { Order } from '@prisma/client'
-
-const ORDER_STATUSES: Order['status'][] = [
-    'CANCEL',
-    'PENDING',
-    'SHIPPING',
-    'DELIVERED',
-]
-
-const publisherBase = {
-    id: z.string().uuid(),
-    name: z.string(),
-}
-
-const authorBase = {
-    id: z.string().uuid(),
-    name: z.string(),
-}
-
-const categoryBase = {
-    id: z.string().uuid(),
-    name: z.string(),
-}
-
-const orderBase = {
-    id: z.string().uuid(),
-    status: z.string().refine((value) => {
-        if (ORDER_STATUSES.includes(value as Order['status'])) return true
-    }) as z.ZodType<Order['status']>,
-}
-
-const bookBase = {
-    id: z.string().uuid(),
-    title: z.string(),
-    description: z.string(),
-    stock: z.number().int().nonnegative(),
-    price: z.number().nonnegative(),
-    publishedAt: z.date(),
-    pages: z.number().int().nonnegative(),
-    format: z.string(),
-    coverType: z.string(),
-    coverImageUrl: z.string(),
-    authorsIds: authorBase.id.array(),
-    publisherId: publisherBase.id,
-    categoriesIds: categoryBase.id.array(),
-}
+import { adminProcedure, createTRPCRouter, publicProcedure } from '../trpc'
+import { bookBase } from '~/schemes/base/bookBase.scheme'
 
 const addBookSchema = z.object(bookBase)
 
@@ -63,6 +18,25 @@ const getBestSellersSchema = z.object({
 })
 
 export const bookRouter = createTRPCRouter({
+    addBooks: adminProcedure
+        .input(addBooksSchema)
+        .mutation(({ ctx, input }) => {
+            const { books } = input
+
+            return ctx.prisma.book.createMany({
+                data: books.map((book) => {
+                    return {
+                        ...book,
+                        authors: {
+                            connect: book.authorsIds.map((a) => ({ id: a })),
+                        },
+                        categories: {
+                            connect: book.categoriesIds.map((c) => ({ id: c })),
+                        },
+                    }
+                }),
+            })
+        }),
     addBook: publicProcedure.input(addBookSchema).mutation(({ ctx, input }) => {
         return ctx.prisma.book.create({
             data: {
@@ -92,8 +66,20 @@ export const bookRouter = createTRPCRouter({
         .query(({ ctx, input }) => {
             const { take, lastDays } = input
 
+            const since = new Date(
+                Date.now() * lastDays * 60 * 60 * 1000,
+            ).toISOString()
+
             return ctx.prisma.book.findMany({
-                // TODO add `where` condition for createdAt
+                where: {
+                    order: {
+                        every: {
+                            createdAt: {
+                                gte: since,
+                            },
+                        },
+                    },
+                },
                 take,
                 orderBy: {
                     order: {

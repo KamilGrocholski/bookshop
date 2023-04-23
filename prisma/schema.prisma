@@ -105,8 +105,8 @@ model Order {
   status OrderStatus
   total  Float
   createdAt DateTime @default(now())
-
-  books  Book[]
+    cart CartItem[]
+    
   user   User   @relation(fields: [userId], references: [id])
   userId String
 }

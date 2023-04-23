@@ -1,22 +1,17 @@
 import React from 'react'
-import { RouterOutputs } from '~/utils/api'
 import Image from 'next/image'
+import { Book } from '@prisma/client'
 
-const BookCard: React.FC<RouterOutputs['book']['bestsellers'][number]> = (
-    book,
-) => {
+export type BookCard = Pick<Book, 'coverImageUrl' | 'id' | 'title'>
+
+const BookCard: React.FC<BookCard> = (book) => {
     return (
-        <article className="flex flex-col space-y-2 items-center">
-            <h2>{book.title}</h2>
-            <div>
-                <Image src={book.coverImageURL} alt={book.coverImageURL} />
-            </div>
-            <div>
-                <p>{book.price}</p>
-                <button className="uppercase bg-teal-700 p-3">
-                    Add to cart
-                </button>
-            </div>
+        <article
+            data-book__id={book.id}
+            data-book__title={book.title}
+            className="flex flex-col space-y-2 items-center"
+        >
+            <Image src={book.coverImageUrl} alt={book.coverImageUrl} />
         </article>
     )
 }
