@@ -40,14 +40,13 @@ async function seedDatabase() {
     }
 
     const authors = await seedAuthors(client, 10)
-    const categories = await seedCategories(client, 10)
     const publishers = await seedPublishers(client, 10)
-    const books = await seedBooks(client, 30, authors, categories, publishers)
+    const books = await seedBooks(client, 30, authors, publishers)
 }
 
 async function seedAuthors(client, quantity) {
     const records = [
-        ...Array(quantity).map((value, index) => {
+        ...Array.from({ length: quantity }).map((value, index) => {
             const id = index + 1
             const name = faker.name.fullName()
             const description = faker.lorem.paragraph()
@@ -62,6 +61,7 @@ async function seedAuthors(client, quantity) {
         }),
     ]
 
+    console.log(records)
     const result = await client.author.createMany({
         data: records,
         skipDuplicates: true,
@@ -74,34 +74,9 @@ async function seedAuthors(client, quantity) {
     return records
 }
 
-async function seedCategories(client, quantity) {
-    const records = [
-        ...Array(quantity).map((value, index) => {
-            const id = index + 1
-            const name = faker.music.genre()
-
-            return {
-                id,
-                name,
-            }
-        }),
-    ]
-
-    const result = await client.category.createMany({
-        data: records,
-        skipDuplicates: true,
-    })
-
-    if (result) {
-        console.log(`Categories: ${result.count}`)
-    }
-
-    return records
-}
-
 async function seedPublishers(client, quantity) {
     const records = [
-        ...Array(quantity).map((value, index) => {
+        ...Array.from({ length: quantity }).map((value, index) => {
             const id = index + 1
 
             const name = faker.name.jobDescriptor()
@@ -112,11 +87,22 @@ async function seedPublishers(client, quantity) {
             }
         }),
     ]
+
+    const result = await client.publisher.createMany({
+        data: records,
+        skipDuplicates: true,
+    })
+
+    if (result) {
+        console.log(`Publishers: ${result.count}`)
+    }
+
+    return records
 }
 
-async function seedBooks(client, quantity, authors, categories, publishers) {
+async function seedBooks(client, quantity, authors, publishers) {
     const records = [
-        ...Array(quantity).map((value, index) => {
+        ...Array.from({ length: quantity }).map((value, index) => {
             const id = index + 1
 
             const title = faker.music.songName()
@@ -126,6 +112,7 @@ async function seedBooks(client, quantity, authors, categories, publishers) {
                 max: 255,
                 precision: 0.01,
             })
+            const pages = faker.datatype.number({ min: 0, max: 1500 })
             const stock = faker.datatype.number({ min: 0, max: 1000 })
             const publishedAt = faker.date.between(
                 '2000-01-01T00:00:00.000Z',
@@ -139,10 +126,8 @@ async function seedBooks(client, quantity, authors, categories, publishers) {
                 authors.length,
             )
 
-            const categoriesIds = getNumberOfArrays(
-                faker.datatype.number({ min: 1, max: 5 }),
-                1,
-                categories.length,
+            const categories = Array.from({ length: 3 }).map(() =>
+                faker.music.genre(),
             )
 
             const publisherId = faker.datatype.number({
@@ -156,27 +141,52 @@ async function seedBooks(client, quantity, authors, categories, publishers) {
                 description,
                 price,
                 stock,
+                pages,
                 publishedAt,
                 coverImageUrl,
-                authorId: {
-                    connect: authorsIds,
-                },
-                categoryId: {
-                    connect: categoriesIds,
-                },
                 publisherId,
+                authorsIds,
+                categories,
             }
         }),
     ]
 
-    const result = await client.book.createMany({
-        data: records,
-        skipDuplicates: true,
-    })
-
-    if (result) {
-        console.log(`Authors: ${result.count}`)
-    }
+    const result = await Promise.all(
+        records.map(async (b) => {
+            const bookResult = await client.book.create({
+                data: {
+                    id: b.id,
+                    title: b.title,
+                    description: b.description,
+                    price: b.price,
+                    stock: b.stock,
+                    pages: b.pages,
+                    publishedAt: b.publishedAt,
+                    coverImageUrl: b.coverImageUrl,
+                    authors: {
+                        connect: b.authorsIds.map((a) => ({ id: a })),
+                    },
+                    categories: {
+                        connectOrCreate: b.categories.map((c) => {
+                            return {
+                                where: {
+                                    name: c,
+                                },
+                                create: {
+                                    name: c,
+                                },
+                            }
+                        }),
+                    },
+                    publisher: {
+                        connect: {
+                            id: b.publisherId,
+                        },
+                    },
+                },
+            })
+        }),
+    )
 
     return records
 }

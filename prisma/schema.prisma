@@ -42,9 +42,9 @@ model Session {
 }
 
 model User {
-  id            String     @id @default(cuid())
+  id            String    @id @default(cuid())
   name          String?
-  email         String?    @unique
+  email         String?   @unique
   emailVerified DateTime?
   image         String?
   accounts      Account[]
@@ -60,30 +60,30 @@ model VerificationToken {
 }
 
 model Author {
-  id   String @id @default(uuid())
-  name String
+  id          BigInt  @id @default(autoincrement())
+  name        String
   description String
-  imageUrl String?
+  imageUrl    String?
 
   books Book[]
 }
 
 model Category {
-  id   String @id @default(uuid())
-  name String
+  id   BigInt @id @default(autoincrement())
+  name String @unique
 
   books Book[]
 }
 
 model Publisher {
-  id   String @id @default(uuid())
+  id   BigInt @id @default(autoincrement())
   name String
 
   books Book[]
 }
 
 model Book {
-  id            String   @id @default(uuid())
+  id            BigInt   @id @default(autoincrement())
   title         String
   description   String
   stock         Int      @default(0)
@@ -95,7 +95,7 @@ model Book {
   authors     Author[]
   categories  Category[]
   publisher   Publisher  @relation(fields: [publisherId], references: [id])
-  publisherId String
+  publisherId BigInt
 
   @@index([id])
   @@index([title])
