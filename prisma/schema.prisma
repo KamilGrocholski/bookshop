@@ -49,6 +49,7 @@ model User {
   image         String?
   accounts      Account[]
   sessions      Session[]
+  orders        Order[]
 }
 
 model VerificationToken {
@@ -82,6 +83,35 @@ model Publisher {
   books Book[]
 }
 
+enum OrderStatus {
+  PENDING
+  SHIPPING
+  DELIVERED
+}
+
+model OrderItem {
+  id         BigInt @id @default(autoincrement())
+  quantity   Int
+  totalPrice Float
+
+  order   Order  @relation(fields: [orderId], references: [id])
+  orderId BigInt
+  book    Book   @relation(fields: [bookId], references: [id])
+  bookId  BigInt
+}
+
+model Order {
+  id         BigInt      @id @default(autoincrement())
+  totalPrice Float
+  status     OrderStatus
+
+  items  OrderItem[]
+  user   User        @relation(fields: [userId], references: [id])
+  userId String
+
+  createdAt DateTime @default(now())
+}
+
 model Book {
   id            BigInt   @id @default(autoincrement())
   title         String
@@ -91,10 +121,13 @@ model Book {
   publishedAt   DateTime
   pages         Int
   coverImageUrl String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
   authors     Author[]
   categories  Category[]
-  publisher   Publisher  @relation(fields: [publisherId], references: [id])
+  orderItems  OrderItem[]
+  publisher   Publisher   @relation(fields: [publisherId], references: [id])
   publisherId BigInt
 
   @@index([id])
