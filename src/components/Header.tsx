@@ -1,27 +1,14 @@
 import { useAtom } from 'jotai'
 import Image from 'next/image'
-import { useRef, useState } from 'react'
+import { useRef } from 'react'
 import { isCartOpenAtom } from '~/atoms'
 import ShouldRender from './ShouldRender'
 import Cart from './Cart/Cart'
 import useOnClickOutside from '~/hooks/useOnClickOutside'
+import BooksSearch from './BooksSearch'
 
 const Logo = () => {
     return <Image src={''} alt="logo" className="h-2" />
-}
-
-const SearchBar = () => {
-    const [query, setQuery] = useState<string>('')
-
-    return (
-        <div>
-            <input
-                className="bg-gray-500 rounded-xl px-3"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-            />
-        </div>
-    )
 }
 
 const menuLinks = [
@@ -89,11 +76,7 @@ const Header = () => {
                 <div className="order-1 md:order-none">First</div>
                 <div className="w-full flex flex-row gap-3 order-3 md:w-auto md:order-2">
                     <button className="md:hidden">MENU</button>
-                    <input
-                        type="search"
-                        placeholder="Search"
-                        className="w-full md:w-auto"
-                    />
+                    <BooksSearch />
                 </div>
                 <div className="order-2 md:order-3">
                     <button onClick={() => setIsCartOpen(true)}>Cart</button>

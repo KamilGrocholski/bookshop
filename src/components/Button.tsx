@@ -22,12 +22,14 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>((props, ref) => {
         disabled,
         icon,
         className,
+        type,
         ...rest
     } = props
 
     return (
         <button
             ref={ref}
+            type={type ?? 'button'}
             disabled={disabled || isLoading}
             aria-disabled={disabled || isLoading}
             className={clsx(

@@ -1,6 +1,5 @@
 import { z } from 'zod'
 import { createTRPCRouter, publicProcedure } from '../trpc'
-import { TRPCError } from '@trpc/server'
 import { categoryBase } from '~/schemes/base/categoryBase.scheme'
 
 export const getBookByIdSchema = z.object({
@@ -21,7 +20,80 @@ export const getPopularByCategoriesSchema = z.object({
     take: z.number().int().positive(),
 })
 
+export const getBooksByQuerySchema = z.object({
+    query: z.string(),
+    take: z.number().int().positive(),
+})
+
 export const bookRouter = createTRPCRouter({
+    getByQuery: publicProcedure
+        .input(getBooksByQuerySchema)
+        .query(async ({ ctx, input }) => {
+            const { take, query } = input
+
+            const count = await ctx.prisma.book.count({
+                where: {
+                    OR: [
+                        {
+                            authors: {
+                                some: {
+                                    name: {
+                                        contains: query,
+                                        mode: 'insensitive',
+                                    },
+                                },
+                            },
+                        },
+                        {
+                            title: {
+                                contains: query,
+                                mode: 'insensitive',
+                            },
+                        },
+                    ],
+                },
+            })
+
+            const books = await ctx.prisma.book.findMany({
+                take,
+                where: {
+                    OR: [
+                        {
+                            authors: {
+                                some: {
+                                    name: {
+                                        contains: query,
+                                        mode: 'insensitive',
+                                    },
+                                },
+                            },
+                        },
+                        {
+                            title: {
+                                contains: query,
+                                mode: 'insensitive',
+                            },
+                        },
+                    ],
+                },
+                select: {
+                    id: true,
+                    title: true,
+                    coverImageUrl: true,
+                    authors: {
+                        select: {
+                            id: true,
+                            name: true,
+                        },
+                    },
+                },
+            })
+
+            return {
+                books,
+                count,
+            }
+        }),
     getSimilarBooks: publicProcedure
         .input(getPopularByCategoriesSchema)
         .query(({ ctx, input }) => {
