@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
 export const categoryBase = {
-    id: z.string().uuid(),
+    id: z.bigint(),
     name: z.string(),
 }

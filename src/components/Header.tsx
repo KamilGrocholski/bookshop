@@ -45,7 +45,7 @@ const fastLinks = [
 
 const FastMenu = () => {
     return (
-        <ul className="flex items-center justify-between w-full">
+        <ul className="flex items-center justify-around container mx-auto">
             {fastLinks.map((link) => (
                 <li key={link.label}>{link.label}</li>
             ))}
@@ -85,7 +85,7 @@ const Header = () => {
 
     return (
         <header className="flex flex-col w-full static top-0 px-5 py-1">
-            <div className="relative h-24 w-full flex flex-wrap justify-between items-center">
+            <div className="relative h-16 w-full flex flex-wrap justify-between items-center">
                 <div className="order-1 md:order-none">First</div>
                 <div className="w-full flex flex-row gap-3 order-3 md:w-auto md:order-2">
                     <button className="md:hidden">MENU</button>

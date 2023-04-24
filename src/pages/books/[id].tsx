@@ -5,8 +5,11 @@ import { api } from '~/utils/api'
 import Image from 'next/image'
 import Link from 'next/link'
 import Head from 'next/head'
-import ShouldRender from '~/components/ShouldRender'
 import clsx from 'clsx'
+import { useAtom } from 'jotai'
+import { cartAtom } from '~/atoms'
+import { useMemo } from 'react'
+import { Book } from '@prisma/client'
 
 const BookPage = () => {
     const router = useRouter()
@@ -23,6 +26,30 @@ const BookPage = () => {
                 data={bookQuery.data}
                 isLoading={bookQuery.isLoading}
                 isError={bookQuery.isError}
+                Error={
+                    <div className="flex flex-col gap-1 items-center">
+                        <p>An error has occured.</p>
+                        <p>
+                            <button
+                                className="p-2 bg-green-500 rounded-lg"
+                                onClick={() => router.replace(router.asPath)}
+                            >
+                                Try again.
+                            </button>
+                        </p>
+                    </div>
+                }
+                Empty={
+                    <div className="flex flex-col gap-1 items-center">
+                        <p>A book with such id does not exist.</p>
+                        <p>
+                            <Link className="underline" href="/">
+                                Click here
+                            </Link>
+                            , to find what you want.
+                        </p>
+                    </div>
+                }
                 NonEmpty={(book) => (
                     <>
                         <Head>
@@ -78,7 +105,7 @@ const BookPage = () => {
                             </div>
                             <div className="col-span-2">
                                 <h1>{book.title}</h1>
-                                <ul className="flex flex-wrap gap-3">
+                                <ul className="flex flex-col gap-1">
                                     {book.authors.map((author) => (
                                         <li key={author.id.toString()}>
                                             <Link
@@ -137,11 +164,42 @@ const Details: React.FC<{ pairs: Record<string, string | number> }> = ({
 }
 
 const BookForm: React.FC<{
-    bookId: bigint
-    stock: number
-}> = ({ bookId, stock }) => {
+    book: Pick<Book, 'id' | 'title' | 'coverImageUrl' | 'stock'>
+}> = ({ stock, id, title, coverImageUrl }) => {
+    const [cart, setCart] = useAtom(cartAtom)
+
+    const isItemInCart = useMemo(() => {
+        return cart.items.find((item) => item.book.id === id)
+    }, [cart])
+
+    const handleAddToCart = (e: React.FormEvent) => {
+        e.preventDefault()
+
+        if (isItemInCart) {
+            return
+        }
+
+        setCart((prev) => {
+            const newCart = {
+                items: [
+                    ...prev.items,
+                    {
+                        book: {
+                            id,
+                            title,
+                            coverImageUrl,
+                        },
+                        quantity: 1,
+                    },
+                ],
+            }
+
+            return newCart
+        })
+    }
+
     return (
-        <form onSubmit={() => {}}>
+        <form onSubmit={handleAddToCart}>
             <div
                 className={clsx(
                     'uppercase font-semibold',

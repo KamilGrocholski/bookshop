@@ -1,6 +1,8 @@
 import { z } from 'zod'
 
 export const authorBase = {
-    id: z.string().uuid(),
+    id: z.bigint(),
     name: z.string(),
+    description: z.string(),
+    imageUrl: z.string(),
 }
