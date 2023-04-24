@@ -1,9 +1,8 @@
 import { z } from 'zod'
 import { createTRPCRouter, publicProcedure } from '../trpc'
-import { bookBase } from '~/schemes/base/bookBase.scheme'
 
 export const getBookByIdSchema = z.object({
-    id: bookBase.id,
+    id: z.string().nonempty().transform(BigInt),
 })
 
 export const getBestSellersSchema = z.object({
@@ -24,6 +23,11 @@ export const bookRouter = createTRPCRouter({
             return ctx.prisma.book.findUnique({
                 where: {
                     id,
+                },
+                include: {
+                    authors: true,
+                    categories: true,
+                    publisher: true,
                 },
             })
         }),
@@ -52,6 +56,17 @@ export const bookRouter = createTRPCRouter({
                         _count: 'desc',
                     },
                 },
+                select: {
+                    id: true,
+                    title: true,
+                    coverImageUrl: true,
+                    authors: {
+                        select: {
+                            id: true,
+                            name: true,
+                        },
+                    },
+                },
             })
         }),
     getRecentlyAdded: publicProcedure
@@ -63,6 +78,17 @@ export const bookRouter = createTRPCRouter({
                 take,
                 orderBy: {
                     createdAt: 'desc',
+                },
+                select: {
+                    id: true,
+                    title: true,
+                    coverImageUrl: true,
+                    authors: {
+                        select: {
+                            id: true,
+                            name: true,
+                        },
+                    },
                 },
             })
         }),

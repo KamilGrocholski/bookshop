@@ -1,0 +1,171 @@
+import { useRouter } from 'next/router'
+import StateWrapper from '~/components/StateWrapper'
+import MainLayout from '~/layouts/MainLayout'
+import { api } from '~/utils/api'
+import Image from 'next/image'
+import Link from 'next/link'
+import Head from 'next/head'
+import ShouldRender from '~/components/ShouldRender'
+import clsx from 'clsx'
+
+const BookPage = () => {
+    const router = useRouter()
+
+    const id = router.query.id as string
+
+    const bookQuery = api.book.getOneById.useQuery({
+        id,
+    })
+
+    return (
+        <MainLayout>
+            <StateWrapper
+                data={bookQuery.data}
+                isLoading={bookQuery.isLoading}
+                isError={bookQuery.isError}
+                NonEmpty={(book) => (
+                    <>
+                        <Head>
+                            <title>{book.title}</title>
+                            <meta
+                                name="description"
+                                content={book.description}
+                            />
+                            <meta property="og:type" content="book" />
+                            <meta property="og:title" content={book.title} />
+                            <meta
+                                property="og:description"
+                                content={book.description}
+                            />
+                            <meta
+                                property="og:image"
+                                content={book.coverImageUrl}
+                            />
+                            <meta
+                                property="og:image:alt"
+                                content={book.title}
+                            />
+                            <meta property="twitter:card" content="summary" />
+                            <meta
+                                property="twitter:title"
+                                content={book.title}
+                            />
+                            <meta
+                                property="twitter:description"
+                                content={book.description}
+                            />
+                            <meta
+                                property="twitter:image"
+                                content={book.coverImageUrl}
+                            />
+                            <meta
+                                property="twitter:image:alt"
+                                content={book.title}
+                            />
+                            <meta
+                                property="twitter:card:alt"
+                                content="Book cover"
+                            />
+                        </Head>
+                        <div className="grid grid-cols-1 mx-auto lg:grid-cols-3 gap-8 prose">
+                            <div className="col-span-1">
+                                <Image
+                                    width={250}
+                                    height={250}
+                                    src={book.coverImageUrl}
+                                    alt={book.title}
+                                />
+                            </div>
+                            <div className="col-span-2">
+                                <h1>{book.title}</h1>
+                                <ul className="flex flex-wrap gap-3">
+                                    {book.authors.map((author) => (
+                                        <li key={author.id.toString()}>
+                                            <Link
+                                                href={`/authors/${author.id}`}
+                                            >
+                                                {author.name}
+                                            </Link>
+                                        </li>
+                                    ))}
+                                </ul>
+                                <div>
+                                    <BookForm
+                                        stock={book.stock}
+                                        bookId={book.id}
+                                    />
+                                </div>
+                                <section>
+                                    <h2>Description</h2>
+                                    <p>{book.description}</p>
+                                </section>
+                                <section>
+                                    <h2>Details</h2>
+                                    <Details
+                                        pairs={{
+                                            Price: book.price,
+                                            Publisher: book.publisher.name,
+                                            PublishDate: book.publishedAt
+                                                .toISOString()
+                                                .slice(0, 10),
+                                            Page: book.pages,
+                                        }}
+                                    />
+                                </section>
+                            </div>
+                        </div>
+                    </>
+                )}
+            />
+        </MainLayout>
+    )
+}
+
+const Details: React.FC<{ pairs: Record<string, string | number> }> = ({
+    pairs,
+}) => {
+    return (
+        <ul className="flex flex-col gap-1 justify-start w-fit">
+            {Object.entries(pairs).map(([key, value]) => (
+                <li key={key} className="grid grid-cols-2">
+                    <span className="text-end mr-2">{key}</span>
+                    <span className="text-start">{value}</span>
+                </li>
+            ))}
+        </ul>
+    )
+}
+
+const BookForm: React.FC<{
+    bookId: bigint
+    stock: number
+}> = ({ bookId, stock }) => {
+    return (
+        <form onSubmit={() => {}}>
+            <div
+                className={clsx(
+                    'uppercase font-semibold',
+                    stock > 0 ? 'text-teal-500' : 'text-red-500',
+                )}
+            >
+                {stock > 0 ? 'available' : 'not available'}
+            </div>
+            <div className="flex gap-3">
+                <button
+                    type="submit"
+                    className="uppercase border rounded-lg px-5 py-1 text-lg font-semibold"
+                >
+                    Add to cart
+                </button>
+                <button
+                    type="button"
+                    className="uppercase border rounded-lg px-5 py-1 text-lg font-semibold"
+                >
+                    Add to whishlist
+                </button>
+            </div>
+        </form>
+    )
+}
+
+export default BookPage

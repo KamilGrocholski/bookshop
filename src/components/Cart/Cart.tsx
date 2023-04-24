@@ -1,14 +1,14 @@
 import { useAtom } from 'jotai'
 import Image from 'next/image'
 import { cartAtom, type Cart } from '~/atoms'
+import ShouldRender from '../ShouldRender'
+import { forwardRef } from 'react'
 
-export type CartProps = Cart
-
-const Cart: React.FC<CartProps> = () => {
+const Cart = forwardRef<HTMLDivElement>((_, ref) => {
     const [cart, setCart] = useAtom(cartAtom)
 
     const handleSetCartQuantity = (
-        book: CartProps['items'][number]['book'],
+        book: Cart['items'][number]['book'],
         newQuantity: number,
     ) => {
         setCart((prev) => {
@@ -28,8 +28,11 @@ const Cart: React.FC<CartProps> = () => {
     }
 
     return (
-        <div>
+        <div ref={ref} className="absolute top-16 right-0 border border-black">
             <ul className="flex flex-col space-y-3">
+                <ShouldRender if={cart.items.length === 0}>
+                    You have no items in the cart.
+                </ShouldRender>
                 {cart.items.map((item) => (
                     <li
                         key={item.book.id.toString()}
@@ -54,6 +57,6 @@ const Cart: React.FC<CartProps> = () => {
             </ul>
         </div>
     )
-}
+})
 
 export default Cart

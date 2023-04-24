@@ -1,18 +1,35 @@
 import React from 'react'
 import Image from 'next/image'
-import { Book } from '@prisma/client'
+import { RouterOutputs } from '~/utils/api'
+import Link from 'next/link'
+export type BookCardProps = RouterOutputs['book']['getBestSellers'][number]
 
-export type BookCard = Pick<Book, 'coverImageUrl' | 'id' | 'title'>
-
-const BookCard: React.FC<BookCard> = (book) => {
+const BookCard: React.FC<BookCardProps> = (book) => {
     return (
-        <article
-            data-book__id={book.id}
-            data-book__title={book.title}
-            className="flex flex-col space-y-2 items-center"
-        >
-            <Image src={book.coverImageUrl} alt={book.coverImageUrl} />
-        </article>
+        <Link href={`/books/${book.id.toString()}`}>
+            <article
+                data-book__id={book.id}
+                data-book__title={book.title}
+                data-book__cover-image-url={book.coverImageUrl}
+                data-book__authors={book.authors}
+                className="relative group flex flex-col space-y-2 items-center h-fit w-fit cursor-pointer"
+            >
+                <Image
+                    width={200}
+                    height={200}
+                    src={book.coverImageUrl}
+                    alt={book.coverImageUrl}
+                />
+                <div className="group-hover:opacity-100 opacity-0 absolute inset-0 bg-black/50 text-white transition-all duration-300 ease-in-out p-3 flex flex-col justify-between">
+                    <p>{book.title}</p>
+                    <ul className="flex flex-wrap gap-3">
+                        {book.authors.map((author) => (
+                            <li key={author.id.toString()}>{author.name}</li>
+                        ))}
+                    </ul>
+                </div>
+            </article>
+        </Link>
     )
 }
 

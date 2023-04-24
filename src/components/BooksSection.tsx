@@ -1,22 +1,22 @@
-import type { Book } from '@prisma/client'
-import BookCard from './Book/BookCard'
+import BookCard, { BookCardProps } from './Book/BookCard'
 
 export type BooksSectionProps = {
     title: string
-    books: Pick<Book, 'coverImageUrl' | 'title' | 'id'>[]
+    books: BookCardProps[]
 }
 
 const BooksSection: React.FC<BooksSectionProps> = ({ title, books }) => {
     return (
         <section>
             <h1>{title}</h1>
-            <div>
+            <div className="grid grid-cols-5 gap-5">
                 {books.map((book) => (
                     <BookCard
                         id={book.id}
-                        coverImageUrl={book.coverImageUrl}
                         title={book.title}
-                        key={book.id}
+                        coverImageUrl={book.coverImageUrl}
+                        authors={book.authors}
+                        key={book.id.toString()}
                     />
                 ))}
             </div>

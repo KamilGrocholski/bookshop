@@ -1,3 +1,4 @@
+import { atom } from 'jotai'
 import { atomWithStorage } from 'jotai/utils'
 
 export type Cart = {
@@ -12,3 +13,5 @@ export type Cart = {
 }
 
 export const cartAtom = atomWithStorage<Cart>('cart', { items: [] })
+
+export const isCartOpenAtom = atom<boolean>(false)

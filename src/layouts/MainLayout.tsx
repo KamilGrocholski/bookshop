@@ -7,7 +7,7 @@ const MainLayout: React.FC<{
     return (
         <div className="flex flex-col">
             <Header />
-            <main className="min-h-screen max-h-full container-mx-auto">
+            <main className="min-h-screen max-h-full py-24 px-5 container mx-auto">
                 {children}
             </main>
             <Footer />

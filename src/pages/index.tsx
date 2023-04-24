@@ -11,6 +11,10 @@ const Home: NextPage = () => {
         lastDays: 7,
     })
 
+    const recentlyAddedQuery = api.book.getRecentlyAdded.useQuery({
+        take: 15,
+    })
+
     return (
         <>
             <Head>
@@ -34,6 +38,23 @@ const Home: NextPage = () => {
                     }
                     NonEmpty={(books) => (
                         <BooksSection title={'Best sellers'} books={books} />
+                    )}
+                />
+                <StateWrapper
+                    data={recentlyAddedQuery.data}
+                    isLoading={recentlyAddedQuery.isLoading}
+                    isError={recentlyAddedQuery.isError}
+                    Empty={
+                        <div>Currently there are no books in the store.</div>
+                    }
+                    Error={
+                        <div>
+                            Something went wrong and we could't get the best
+                            sellers list.
+                        </div>
+                    }
+                    NonEmpty={(books) => (
+                        <BooksSection title={'Recently added'} books={books} />
                     )}
                 />
             </MainLayout>
