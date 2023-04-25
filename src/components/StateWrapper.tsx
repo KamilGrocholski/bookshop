@@ -1,3 +1,5 @@
+import Loader from './Loader'
+
 export type StateWrapperProps<T> = {
     data: T
     isLoading: boolean
@@ -45,7 +47,7 @@ function StateWrapper<T>({
 const DefaultError = <div className="w-fit mx-auto">Error</div>
 const DefaultLoading = (
     <div className="w-fit mx-auto">
-        <div className="w-16 h-16 border-4 border-dashed rounded-full animate-spin border-red-500"></div>
+        <Loader />
     </div>
 )
 const DefaultEmpty = <div className="w-fit mx-auto">Empty</div>

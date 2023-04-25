@@ -72,6 +72,7 @@ const VARIANT = {
 } as const
 
 const SIZE = {
+    sm: 'px-2 py-1 text-sm',
     base: 'px-3 py-2 text-base',
     lg: 'px-5 py-3 text-lg',
 } as const

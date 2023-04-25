@@ -1,6 +1,7 @@
 import { type NextPage } from 'next'
 import Head from 'next/head'
 import BooksSection from '~/components/BooksSection'
+import BooksSectionLoader from '~/components/BooksSectionLoader'
 import StateWrapper from '~/components/StateWrapper'
 import MainLayout from '~/layouts/MainLayout'
 import { api } from '~/utils/api'
@@ -27,12 +28,13 @@ const Home: NextPage = () => {
                     data={bestSellersQuery.data}
                     isLoading={bestSellersQuery.isLoading}
                     isError={bestSellersQuery.isError}
+                    Loading={<BooksSectionLoader />}
                     Empty={
                         <div>Currently there are no books in the store.</div>
                     }
                     Error={
                         <div>
-                            Something went wrong and we could't get the best
+                            Something went wrong and we could not get the best
                             sellers list.
                         </div>
                     }
@@ -44,12 +46,13 @@ const Home: NextPage = () => {
                     data={recentlyAddedQuery.data}
                     isLoading={recentlyAddedQuery.isLoading}
                     isError={recentlyAddedQuery.isError}
+                    Loading={<BooksSectionLoader />}
                     Empty={
                         <div>Currently there are no books in the store.</div>
                     }
                     Error={
                         <div>
-                            Something went wrong and we could't get the best
+                            Something went wrong and we could not get the best
                             sellers list.
                         </div>
                     }

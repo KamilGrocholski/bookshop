@@ -22,15 +22,17 @@ const AuthorPage = () => {
                 isLoading={authorQuery.isLoading}
                 isError={authorQuery.isError}
                 NonEmpty={(author) => (
-                    <div className="flex flex-col gap-1 prose mx-auto">
-                        <h1>{author.name}</h1>
-                        <div>
-                            <Image
-                                width={350}
-                                height={300}
-                                src={author.imageUrl ?? ''}
-                                alt={author.name}
-                            />
+                    <div className="flex flex-col gap-12 mx-auto max-w-base">
+                        <div className="flex flex-col ">
+                            <h1>{author.name}</h1>
+                            <figure>
+                                <Image
+                                    width={350}
+                                    height={300}
+                                    src={author.imageUrl ?? ''}
+                                    alt={author.name}
+                                />
+                            </figure>
                         </div>
                         <section>
                             <h2>About</h2>
@@ -38,7 +40,7 @@ const AuthorPage = () => {
                         </section>
                         <section>
                             <h2>Titles</h2>
-                            <div className="grid lg:grid-cols-3 grid-cols-1 gap-5">
+                            <div className="grid md:grid-cols-3 grid-cols-1 gap-8">
                                 {author.books.map((book) => (
                                     <BookCardWithAction
                                         {...book}

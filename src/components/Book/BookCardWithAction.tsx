@@ -18,33 +18,31 @@ const BookCardWithAction: React.FC<BookCardWithActionProps> = ({
     authors,
 }) => {
     return (
-        <article className="flex flex-col">
-            <div>
-                <Link href={`/books/${id}`}>
-                    <Image
-                        width={250}
-                        height={200}
-                        src={coverImageUrl}
-                        alt={title}
-                    />
-                </Link>
-            </div>
-            <div className="flex flex-col justify-between h-full">
-                <h3>{title}</h3>
-                <div className="flex flex-wrap gap-1">
+        <article className="flex flex-col gap-2 hover:shadow-lg rounded-lg">
+            <figure className="w-full flex justify-center">
+                <Image
+                    src={coverImageUrl}
+                    alt={title}
+                    width={256}
+                    height={256}
+                />
+            </figure>
+            <div className="grid grid-cols-1 auto-rows-fr gap-1 h-full">
+                <h3 className="text-center">{title}</h3>
+                <div className="flex flex-wrap gap-1 justify-center">
                     {authors.map((author) => (
-                        <Link
+                        <span
                             key={author.id.toString()}
-                            href={`/authors/${author.id}`}
+                            className='text-sm after:content-[","] last:after:content-[""]'
                         >
                             {author.name}
-                        </Link>
+                        </span>
                     ))}
                 </div>
-                <p>${price}</p>
             </div>
-            <div className="w-full flex justify-center">
-                <Button className="w-full">Add to cart</Button>
+            <div className="flex flex-col gap-1">
+                <p className="text-center font-semibold">{price} $</p>
+                <Button>Add to cart</Button>
             </div>
         </article>
     )

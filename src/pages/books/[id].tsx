@@ -10,6 +10,7 @@ import { useAtom } from 'jotai'
 import { cartAtom } from '~/atoms'
 import { useMemo } from 'react'
 import { Book } from '@prisma/client'
+import Button from '~/components/Button'
 
 const BookPage = () => {
     const router = useRouter()
@@ -94,7 +95,7 @@ const BookPage = () => {
                                 content="Book cover"
                             />
                         </Head>
-                        <div className="grid grid-cols-1 mx-auto lg:grid-cols-3 gap-8 prose">
+                        <div className="grid grid-cols-1 mx-auto lg:grid-cols-3 gap-8 max-w-base">
                             <div className="col-span-1">
                                 <Image
                                     width={250}
@@ -103,23 +104,30 @@ const BookPage = () => {
                                     alt={book.title}
                                 />
                             </div>
-                            <div className="col-span-2">
-                                <h1>{book.title}</h1>
-                                <ul className="flex flex-col gap-1">
-                                    {book.authors.map((author) => (
-                                        <li key={author.id.toString()}>
-                                            <Link
-                                                href={`/authors/${author.id}`}
-                                            >
-                                                {author.name}
-                                            </Link>
-                                        </li>
-                                    ))}
-                                </ul>
+                            <div className="col-span-2 flex flex-col gap-12">
+                                <div>
+                                    <h1>{book.title}</h1>
+                                    <ul className="flex flex-col gap-1">
+                                        {book.authors.map((author) => (
+                                            <li key={author.id.toString()}>
+                                                <Link
+                                                    href={`/authors/${author.id}`}
+                                                    className="underline"
+                                                >
+                                                    {author.name}
+                                                </Link>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
                                 <div>
                                     <BookForm
-                                        stock={book.stock}
-                                        bookId={book.id}
+                                        book={{
+                                            stock: book.stock,
+                                            title: book.title,
+                                            id: book.id,
+                                            coverImageUrl: book.coverImageUrl,
+                                        }}
                                     />
                                 </div>
                                 <section>
@@ -130,12 +138,12 @@ const BookPage = () => {
                                     <h2>Details</h2>
                                     <Details
                                         pairs={{
-                                            Price: book.price,
+                                            Price: `${book.price} $`,
                                             Publisher: book.publisher.name,
                                             PublishDate: book.publishedAt
                                                 .toISOString()
                                                 .slice(0, 10),
-                                            Page: book.pages,
+                                            Pages: book.pages,
                                         }}
                                     />
                                 </section>
@@ -154,9 +162,11 @@ const Details: React.FC<{ pairs: Record<string, string | number> }> = ({
     return (
         <ul className="flex flex-col gap-1 justify-start w-fit">
             {Object.entries(pairs).map(([key, value]) => (
-                <li key={key} className="grid grid-cols-2">
-                    <span className="text-end mr-2">{key}</span>
-                    <span className="text-start">{value}</span>
+                <li key={key}>
+                    <p className="grid grid-cols-2">
+                        <span className="text-end mr-2">{key}</span>
+                        <span className="text-start">{value}</span>
+                    </p>
                 </li>
             ))}
         </ul>
@@ -165,7 +175,7 @@ const Details: React.FC<{ pairs: Record<string, string | number> }> = ({
 
 const BookForm: React.FC<{
     book: Pick<Book, 'id' | 'title' | 'coverImageUrl' | 'stock'>
-}> = ({ stock, id, title, coverImageUrl }) => {
+}> = ({ book: { stock, id, title, coverImageUrl } }) => {
     const [cart, setCart] = useAtom(cartAtom)
 
     const isItemInCart = useMemo(() => {
@@ -209,18 +219,8 @@ const BookForm: React.FC<{
                 {stock > 0 ? 'available' : 'not available'}
             </div>
             <div className="flex gap-3">
-                <button
-                    type="submit"
-                    className="uppercase border rounded-lg px-5 py-1 text-lg font-semibold"
-                >
-                    Add to cart
-                </button>
-                <button
-                    type="button"
-                    className="uppercase border rounded-lg px-5 py-1 text-lg font-semibold"
-                >
-                    Add to whishlist
-                </button>
+                <Button type="submit">Add to cart</Button>
+                <Button variant="secondary">Add to whishlist</Button>
             </div>
         </form>
     )

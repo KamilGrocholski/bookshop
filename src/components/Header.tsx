@@ -1,14 +1,14 @@
 import { useAtom } from 'jotai'
-import Image from 'next/image'
 import { useRef } from 'react'
 import { isCartOpenAtom } from '~/atoms'
 import ShouldRender from './ShouldRender'
 import Cart from './Cart/Cart'
 import useOnClickOutside from '~/hooks/useOnClickOutside'
 import BooksSearch from './BooksSearch'
+import Link from 'next/link'
 
 const Logo = () => {
-    return <Image src={''} alt="logo" className="h-2" />
+    return <Link href="/">Bookshop</Link>
 }
 
 const menuLinks = [
@@ -73,7 +73,9 @@ const Header = () => {
     return (
         <header className="flex flex-col w-full static top-0 px-5 py-1">
             <div className="relative h-16 w-full flex flex-wrap justify-between items-center">
-                <div className="order-1 md:order-none">First</div>
+                <div className="order-1 md:order-none">
+                    <Logo />
+                </div>
                 <div className="w-full flex flex-row gap-3 order-3 md:w-auto md:order-2">
                     <button className="md:hidden">MENU</button>
                     <BooksSearch />
