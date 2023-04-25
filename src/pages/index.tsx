@@ -1,20 +1,57 @@
-import { type NextPage } from 'next'
+import {
+    GetStaticPropsContext,
+    InferGetStaticPropsType,
+    type NextPage,
+} from 'next'
 import Head from 'next/head'
 import BooksSection from '~/components/BooksSection'
 import BooksSectionLoader from '~/components/BooksSectionLoader'
 import StateWrapper from '~/components/StateWrapper'
 import MainLayout from '~/layouts/MainLayout'
 import { api } from '~/utils/api'
+import { createServerSideHelpers } from '@trpc/react-query/server'
+import { appRouter } from '~/server/api/root'
+import SuperJSON from 'superjson'
+import { createInnerTRPCContext } from '~/server/api/trpc'
 
-const Home: NextPage = () => {
+// 1 hour in seconds
+export const revalidate = 60 * 60
+export const take = 15
+export const lastDays = 7
+
+export async function getStaticProps(context: GetStaticPropsContext) {
+    const helpers = createServerSideHelpers({
+        router: appRouter,
+        ctx: createInnerTRPCContext({
+            session: null,
+        }),
+        transformer: SuperJSON,
+    })
+
+    await helpers.book.getBestSellers.prefetch({
+        take,
+        lastDays,
+    })
+
+    return {
+        props: {
+            trpcState: helpers.dehydrate(),
+        },
+        revalidate,
+    }
+}
+
+export default function HomePage(
+    props: InferGetStaticPropsType<typeof getStaticProps>,
+) {
     const bestSellersQuery = api.book.getBestSellers.useQuery({
-        take: 15,
-        lastDays: 7,
+        take,
+        lastDays,
     })
 
-    const recentlyAddedQuery = api.book.getRecentlyAdded.useQuery({
-        take: 15,
-    })
+    // const recentlyAddedQuery = api.book.getRecentlyAdded.useQuery({
+    //     take: 15,
+    // })
 
     return (
         <>
@@ -42,27 +79,7 @@ const Home: NextPage = () => {
                         <BooksSection title={'Best sellers'} books={books} />
                     )}
                 />
-                <StateWrapper
-                    data={recentlyAddedQuery.data}
-                    isLoading={recentlyAddedQuery.isLoading}
-                    isError={recentlyAddedQuery.isError}
-                    Loading={<BooksSectionLoader />}
-                    Empty={
-                        <div>Currently there are no books in the store.</div>
-                    }
-                    Error={
-                        <div>
-                            Something went wrong and we could not get the best
-                            sellers list.
-                        </div>
-                    }
-                    NonEmpty={(books) => (
-                        <BooksSection title={'Recently added'} books={books} />
-                    )}
-                />
             </MainLayout>
         </>
     )
 }
-
-export default Home

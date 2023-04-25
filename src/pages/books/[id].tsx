@@ -11,8 +11,86 @@ import { cartAtom } from '~/atoms'
 import { useMemo } from 'react'
 import { Book } from '@prisma/client'
 import Button from '~/components/Button'
+import { createInnerTRPCContext } from '~/server/api/trpc'
+import { createServerSideHelpers } from '@trpc/react-query/server'
+import { appRouter } from '~/server/api/root'
+import SuperJSON from 'superjson'
+import {
+    GetStaticPaths,
+    GetStaticPropsContext,
+    InferGetStaticPropsType,
+} from 'next'
+import { prisma } from '~/server/db'
 
-const BookPage = () => {
+// 3 hour in seconds
+export const revalidate = 60 * 60 * 3
+export const take = 1000
+export const lastDays = 7
+
+export async function getStaticProps(
+    context: GetStaticPropsContext<{ id: string }>,
+) {
+    const id = context.params?.id as string
+
+    const helpers = createServerSideHelpers({
+        router: appRouter,
+        ctx: createInnerTRPCContext({
+            session: null,
+        }),
+        transformer: SuperJSON,
+    })
+
+    await helpers.book.getOneById.prefetch({
+        id,
+    })
+
+    return {
+        props: {
+            trpcState: helpers.dehydrate(),
+        },
+        revalidate,
+    }
+}
+
+export const getStaticPaths: GetStaticPaths = async () => {
+    const since = new Date(Date.now() - lastDays * 60 * 60 * 1000)
+
+    const books = await prisma.book.findMany({
+        take,
+        where: {
+            orderItems: {
+                every: {
+                    order: {
+                        createdAt: {
+                            gte: since,
+                        },
+                    },
+                },
+            },
+        },
+        orderBy: {
+            orderItems: {
+                _count: 'desc',
+            },
+        },
+        select: {
+            id: true,
+        },
+    })
+
+    return {
+        paths: books.map((book) => ({
+            params: {
+                id: book.id.toString(),
+            },
+        })),
+        fallback: 'blocking',
+    }
+}
+
+export default function BookPage(
+    props: InferGetStaticPropsType<typeof getStaticProps>,
+) {
     const router = useRouter()
 
     const id = router.query.id as string
@@ -225,5 +303,3 @@ const BookForm: React.FC<{
         </form>
     )
 }
-
-export default BookPage

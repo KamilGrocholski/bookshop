@@ -18,15 +18,15 @@ const menuLinks = [
 ] as const
 
 const fastLinks = [
-    { label: 'Offers', href: '' },
-    { label: 'Offers', href: '' },
-    { label: 'Offers', href: '' },
-    { label: 'Offers', href: '' },
-    { label: 'Offers', href: '' },
-    { label: 'Offers', href: '' },
-    { label: 'Offers', href: '' },
-    { label: 'Offers', href: '' },
-    { label: 'Offers', href: '' },
+    { label: 'Offers1', href: '' },
+    { label: 'Offers2', href: '' },
+    { label: 'Offers3', href: '' },
+    { label: 'Offers4', href: '' },
+    { label: 'Offers5', href: '' },
+    { label: 'Offers6', href: '' },
+    { label: 'Offers7', href: '' },
+    { label: 'Offers8', href: '' },
+    { label: 'Offers9', href: '' },
     { label: 'Offers', href: '' },
 ]
 
