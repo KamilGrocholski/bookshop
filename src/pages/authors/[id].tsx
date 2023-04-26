@@ -1,6 +1,10 @@
 import { Author } from '@prisma/client'
 import { createServerSideHelpers } from '@trpc/react-query/server'
-import { GetStaticPaths, GetStaticPropsContext } from 'next'
+import {
+    GetStaticPaths,
+    GetStaticPropsContext,
+    InferGetStaticPropsType,
+} from 'next'
 import Image from 'next/image'
 import { useRouter } from 'next/router'
 import React from 'react'
@@ -12,6 +16,7 @@ import { appRouter } from '~/server/api/root'
 import { createInnerTRPCContext } from '~/server/api/trpc'
 import { prisma } from '~/server/db'
 import { api } from '~/utils/api'
+import getSecondsFrom from '~/utils/getSecondsFrom'
 
 // 3 hour in seconds
 export const revalidate = 60 * 60 * 3
@@ -42,7 +47,9 @@ export async function getStaticProps(
 }
 
 export const getStaticPaths: GetStaticPaths = async () => {
-    const since = new Date(Date.now() - lastDays * 60 * 60 * 1000)
+    const since = new Date(
+        Date.now() - getSecondsFrom({ unit: 'DAY', value: lastDays }),
+    )
 
     const books = await prisma.book.findMany({
         take,
@@ -99,7 +106,9 @@ export const getStaticPaths: GetStaticPaths = async () => {
     }
 }
 
-const AuthorPage = () => {
+export default function AuthorPage(
+    props: InferGetStaticPropsType<typeof getStaticProps>,
+) {
     const router = useRouter()
 
     const id = router.query.id as string
@@ -148,5 +157,3 @@ const AuthorPage = () => {
         </MainLayout>
     )
 }
-
-export default AuthorPage

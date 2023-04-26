@@ -21,6 +21,7 @@ import { appRouter } from '~/server/api/root'
 import { createInnerTRPCContext } from '~/server/api/trpc'
 import { prisma } from '~/server/db'
 import { api } from '~/utils/api'
+import getSecondsFrom from '~/utils/getSecondsFrom'
 
 // 3 hour in seconds
 export const revalidate = 60 * 60 * 3
@@ -53,13 +54,15 @@ export async function getStaticProps(
 }
 
 export const getStaticPaths: GetStaticPaths = async () => {
-    const since = new Date(Date.now() - lastDays * 60 * 60 * 1000)
+    const since = new Date(
+        Date.now() - getSecondsFrom({ unit: 'DAY', value: lastDays }),
+    )
 
     const books = await prisma.book.findMany({
         take,
         where: {
             orderItems: {
-                every: {
+                some: {
                     order: {
                         createdAt: {
                             gte: since,

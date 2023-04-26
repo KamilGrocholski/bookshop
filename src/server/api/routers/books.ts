@@ -1,6 +1,7 @@
 import { createTRPCRouter, publicProcedure } from '../trpc'
 import { z } from 'zod'
 import { categoryBase } from '~/schemes/base/categoryBase.scheme'
+import getSecondsFrom from '~/utils/getSecondsFrom'
 
 export const getBookByIdSchema = z.object({
     id: z.string().nonempty().transform(BigInt),
@@ -25,7 +26,67 @@ export const getBooksByQuerySchema = z.object({
     take: z.number().int().positive(),
 })
 
+export const booksPaginationSchema = z.object({
+    itemsPerPage: z.number().int().nonnegative().default(25),
+    cursor: z
+        .string()
+        .nonempty()
+        .optional()
+        .transform((value) => {
+            if (value !== undefined) {
+                return BigInt(value)
+            }
+
+            return value
+        }),
+    query: z.string(),
+})
+
 export const bookRouter = createTRPCRouter({
+    booksPagination: publicProcedure
+        .input(booksPaginationSchema)
+        .query(async ({ ctx, input }) => {
+            const { query, itemsPerPage, cursor } = input
+
+            const books = await ctx.prisma.book.findMany({
+                take: itemsPerPage + 1,
+                where: {
+                    title: {
+                        contains: query,
+                        mode: 'insensitive',
+                    },
+                    authors: {
+                        some: {
+                            name: {
+                                contains: query,
+                                mode: 'insensitive',
+                            },
+                        },
+                    },
+                },
+                cursor:
+                    cursor !== undefined
+                        ? {
+                              id: cursor,
+                          }
+                        : undefined,
+                orderBy: {
+                    id: 'desc',
+                },
+            })
+
+            let nextCursor: typeof cursor = undefined
+
+            if (books.length > itemsPerPage) {
+                const nextBook = books.pop()
+                nextCursor = nextBook!.id
+            }
+
+            return {
+                books,
+                nextCursor,
+            }
+        }),
     getByQuery: publicProcedure
         .input(getBooksByQuerySchema)
         .query(async ({ ctx, input }) => {
@@ -149,13 +210,16 @@ export const bookRouter = createTRPCRouter({
         .query(({ ctx, input }) => {
             const { take, lastDays } = input
 
-            const since = new Date(Date.now() - lastDays * 60 * 60 * 1000)
+            const since = new Date(
+                Date.now() -
+                    getSecondsFrom({ unit: 'DAY', value: lastDays }) * 1000,
+            )
 
             return ctx.prisma.book.findMany({
                 take,
                 where: {
                     orderItems: {
-                        some: {
+                        every: {
                             order: {
                                 createdAt: {
                                     gte: since,
