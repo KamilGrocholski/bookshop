@@ -1,81 +1,197 @@
-import { z } from 'zod'
 import { createTRPCRouter, publicProcedure } from '../trpc'
-import { Order } from '@prisma/client'
+import { z } from 'zod'
+import { categoryBase } from '~/schemes/base/categoryBase.scheme'
+import getSecondsFrom from '~/utils/getSecondsFrom'
 
-const ORDER_STATUSES: Order['status'][] = [
-    'CANCEL',
-    'PENDING',
-    'SHIPPING',
-    'DELIVERED',
-]
-
-const publisherBase = {
-    id: z.string().uuid(),
-    name: z.string(),
-}
-
-const authorBase = {
-    id: z.string().uuid(),
-    name: z.string(),
-}
-
-const categoryBase = {
-    id: z.string().uuid(),
-    name: z.string(),
-}
-
-const orderBase = {
-    id: z.string().uuid(),
-    status: z.string().refine((value) => {
-        if (ORDER_STATUSES.includes(value as Order['status'])) return true
-    }) as z.ZodType<Order['status']>,
-}
-
-const bookBase = {
-    id: z.string().uuid(),
-    title: z.string(),
-    description: z.string(),
-    stock: z.number().int().nonnegative(),
-    price: z.number().nonnegative(),
-    publishedAt: z.date(),
-    pages: z.number().int().nonnegative(),
-    format: z.string(),
-    coverType: z.string(),
-    coverImageUrl: z.string(),
-    authorsIds: authorBase.id.array(),
-    publisherId: publisherBase.id,
-    categoriesIds: categoryBase.id.array(),
-}
-
-const addBookSchema = z.object(bookBase)
-
-const addBooksSchema = z.object({
-    books: addBookSchema.array(),
+export const getBookByIdSchema = z.object({
+    id: z.string().nonempty().transform(BigInt),
 })
 
-const getBookByIdSchema = z.object({
-    id: bookBase.id,
-})
-
-const getBestSellersSchema = z.object({
+export const getBestSellersSchema = z.object({
     lastDays: z.number().int().positive(),
     take: z.number().int().positive(),
 })
 
+export const getRecentlyAddedSchema = z.object({
+    take: z.number().int().positive(),
+})
+
+export const getPopularByCategoriesSchema = z.object({
+    categories: categoryBase.id.array(),
+    take: z.number().int().positive(),
+})
+
+export const getBooksByQuerySchema = z.object({
+    query: z.string(),
+    take: z.number().int().positive(),
+})
+
+export const booksPaginationSchema = z.object({
+    itemsPerPage: z.number().int().nonnegative().default(25),
+    cursor: z.bigint().optional(),
+    query: z.string(),
+})
+
 export const bookRouter = createTRPCRouter({
-    addBook: publicProcedure.input(addBookSchema).mutation(({ ctx, input }) => {
-        return ctx.prisma.book.create({
-            data: {
-                ...input,
-                authors: {
-                    connect: input.authorsIds.map((a) => ({ id: a })),
+    booksPagination: publicProcedure
+        .input(booksPaginationSchema)
+        .query(async ({ ctx, input }) => {
+            const { query, itemsPerPage, cursor } = input
+
+            const books = await ctx.prisma.book.findMany({
+                take: itemsPerPage + 1,
+                where: {
+                    title: {
+                        contains: query,
+                        mode: 'insensitive',
+                    },
+                    authors: {
+                        some: {
+                            name: {
+                                contains: query,
+                                mode: 'insensitive',
+                            },
+                        },
+                    },
                 },
-                categories: {
-                    connect: input.categoriesIds.map((c) => ({ id: c })),
+                cursor:
+                    cursor !== undefined
+                        ? {
+                              id: cursor,
+                          }
+                        : undefined,
+                orderBy: {
+                    id: 'desc',
                 },
-            },
-        })
-    }),
+                select: {
+                    id: true,
+                    title: true,
+                    coverImageUrl: true,
+                    price: true,
+                    authors: {
+                        select: {
+                            id: true,
+                            name: true,
+                        },
+                    },
+                },
+            })
+
+            let nextCursor: typeof cursor = undefined
+
+            if (books.length > itemsPerPage) {
+                const nextBook = books.pop()
+                nextCursor = nextBook!.id
+            }
+
+            return {
+                books,
+                nextCursor,
+            }
+        }),
+    getByQuery: publicProcedure
+        .input(getBooksByQuerySchema)
+        .query(async ({ ctx, input }) => {
+            const { take, query } = input
+
+            const count = await ctx.prisma.book.count({
+                where: {
+                    OR: [
+                        {
+                            authors: {
+                                some: {
+                                    name: {
+                                        contains: query,
+                                        mode: 'insensitive',
+                                    },
+                                },
+                            },
+                        },
+                        {
+                            title: {
+                                contains: query,
+                                mode: 'insensitive',
+                            },
+                        },
+                    ],
+                },
+            })
+
+            const books = await ctx.prisma.book.findMany({
+                take,
+                where: {
+                    OR: [
+                        {
+                            authors: {
+                                some: {
+                                    name: {
+                                        contains: query,
+                                        mode: 'insensitive',
+                                    },
+                                },
+                            },
+                        },
+                        {
+                            title: {
+                                contains: query,
+                                mode: 'insensitive',
+                            },
+                        },
+                    ],
+                },
+                select: {
+                    id: true,
+                    title: true,
+                    coverImageUrl: true,
+                    authors: {
+                        select: {
+                            id: true,
+                            name: true,
+                        },
+                    },
+                },
+            })
+
+            return {
+                books,
+                count,
+            }
+        }),
+    getSimilarBooks: publicProcedure
+        .input(getPopularByCategoriesSchema)
+        .query(({ ctx, input }) => {
+            const { take, categories } = input
+
+            return ctx.prisma.book.findMany({
+                take,
+                where: {
+                    categories: {
+                        some: {
+                            id: {
+                                in: categories,
+                            },
+                        },
+                    },
+                },
+                orderBy: {
+                    orderItems: {
+                        _count: 'desc',
+                    },
+                },
+                select: {
+                    id: true,
+                    title: true,
+                    coverImageUrl: true,
+                    price: true,
+                    authors: {
+                        select: {
+                            id: true,
+                            name: true,
+                        },
+                    },
+                },
+            })
+        }),
     getOneById: publicProcedure
         .input(getBookByIdSchema)
         .query(({ ctx, input }) => {
@@ -85,6 +201,11 @@ export const bookRouter = createTRPCRouter({
                 where: {
                     id,
                 },
+                include: {
+                    authors: true,
+                    categories: true,
+                    publisher: true,
+                },
             })
         }),
     getBestSellers: publicProcedure
@@ -92,12 +213,62 @@ export const bookRouter = createTRPCRouter({
         .query(({ ctx, input }) => {
             const { take, lastDays } = input
 
+            const since = new Date(
+                Date.now() -
+                    getSecondsFrom({ unit: 'DAY', value: lastDays }) * 1000,
+            )
+
             return ctx.prisma.book.findMany({
-                // TODO add `where` condition for createdAt
+                take,
+                where: {
+                    orderItems: {
+                        every: {
+                            order: {
+                                createdAt: {
+                                    gte: since,
+                                },
+                            },
+                        },
+                    },
+                },
+                orderBy: {
+                    orderItems: {
+                        _count: 'desc',
+                    },
+                },
+                select: {
+                    id: true,
+                    title: true,
+                    coverImageUrl: true,
+                    price: true,
+                    authors: {
+                        select: {
+                            id: true,
+                            name: true,
+                        },
+                    },
+                },
+            })
+        }),
+    getRecentlyAdded: publicProcedure
+        .input(getRecentlyAddedSchema)
+        .query(({ ctx, input }) => {
+            const { take } = input
+
+            return ctx.prisma.book.findMany({
                 take,
                 orderBy: {
-                    order: {
-                        _count: 'desc',
+                    createdAt: 'desc',
+                },
+                select: {
+                    id: true,
+                    title: true,
+                    coverImageUrl: true,
+                    authors: {
+                        select: {
+                            id: true,
+                            name: true,
+                        },
                     },
                 },
             })
