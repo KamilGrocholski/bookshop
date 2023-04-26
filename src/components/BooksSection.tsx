@@ -11,7 +11,7 @@ const BooksSection: React.FC<BooksSectionProps> = ({ title, books }) => {
     return (
         <section>
             <h1>{title}</h1>
-            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-5">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
                 {books.map((book) => (
                     <BookCardWithAction
                         id={book.id}

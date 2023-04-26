@@ -176,7 +176,7 @@ export default function BookPage(
                                 content="Book cover"
                             />
                         </Head>
-                        <div className="grid grid-cols-1 mx-auto lg:grid-cols-3 gap-8 max-w-base">
+                        <div className="grid grid-cols-1 mx-auto lg:grid-cols-3 gap-8">
                             <div className="col-span-1">
                                 <Image
                                     width={250}

@@ -124,7 +124,7 @@ export default function AuthorPage(
                 isLoading={authorQuery.isLoading}
                 isError={authorQuery.isError}
                 NonEmpty={(author) => (
-                    <div className="flex flex-col gap-12 mx-auto max-w-base">
+                    <div className="flex flex-col gap-12 mx-auto">
                         <div className="flex flex-col ">
                             <h1>{author.name}</h1>
                             <figure>
