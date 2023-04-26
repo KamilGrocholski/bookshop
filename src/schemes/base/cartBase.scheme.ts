@@ -1,5 +1,5 @@
-import { z } from 'zod'
+import { z } from "zod";
 
 export const cartItemBase = {
-    quantity: z.number().int().nonnegative(),
-}
+  quantity: z.number().int().nonnegative(),
+};

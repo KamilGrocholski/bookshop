@@ -1,6 +1,6 @@
-import { z } from 'zod'
+import { z } from "zod";
 
 export const categoryBase = {
-    id: z.bigint(),
-    name: z.string(),
-}
+  id: z.bigint(),
+  name: z.string(),
+};

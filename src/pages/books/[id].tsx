@@ -1,26 +1,26 @@
-import { useRouter } from 'next/router'
-import StateWrapper from '~/components/StateWrapper'
-import MainLayout from '~/layouts/MainLayout'
-import { api } from '~/utils/api'
-import Image from 'next/image'
-import Link from 'next/link'
-import Head from 'next/head'
+import { Book } from '@prisma/client'
+import { createServerSideHelpers } from '@trpc/react-query/server'
 import clsx from 'clsx'
 import { useAtom } from 'jotai'
-import { cartAtom } from '~/atoms'
-import { useMemo } from 'react'
-import { Book } from '@prisma/client'
-import Button from '~/components/Button'
-import { createInnerTRPCContext } from '~/server/api/trpc'
-import { createServerSideHelpers } from '@trpc/react-query/server'
-import { appRouter } from '~/server/api/root'
-import SuperJSON from 'superjson'
 import {
     GetStaticPaths,
     GetStaticPropsContext,
     InferGetStaticPropsType,
 } from 'next'
+import Head from 'next/head'
+import Image from 'next/image'
+import Link from 'next/link'
+import { useRouter } from 'next/router'
+import { useMemo } from 'react'
+import SuperJSON from 'superjson'
+import { cartAtom } from '~/atoms'
+import Button from '~/components/Button'
+import StateWrapper from '~/components/StateWrapper'
+import MainLayout from '~/layouts/MainLayout'
+import { appRouter } from '~/server/api/root'
+import { createInnerTRPCContext } from '~/server/api/trpc'
 import { prisma } from '~/server/db'
+import { api } from '~/utils/api'
 
 // 3 hour in seconds
 export const revalidate = 60 * 60 * 3

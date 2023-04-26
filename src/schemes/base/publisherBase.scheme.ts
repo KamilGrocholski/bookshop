@@ -1,6 +1,6 @@
-import { z } from 'zod'
+import { z } from "zod";
 
 export const publisherBase = {
-    id: z.string().uuid(),
-    name: z.string(),
-}
+  id: z.string().uuid(),
+  name: z.string(),
+};
