@@ -182,6 +182,7 @@ export const bookRouter = createTRPCRouter({
                     id: true,
                     title: true,
                     coverImageUrl: true,
+                    price: true,
                     authors: {
                         select: {
                             id: true,
@@ -239,6 +240,7 @@ export const bookRouter = createTRPCRouter({
                     id: true,
                     title: true,
                     coverImageUrl: true,
+                    price: true,
                     authors: {
                         select: {
                             id: true,
