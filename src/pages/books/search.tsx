@@ -1,5 +1,7 @@
 import { useRouter } from 'next/router'
 import { useEffect, useMemo, useRef } from 'react'
+import BookCardWithAction from '~/components/Book/BookCardWithAction'
+import BooksSection from '~/components/BooksSection'
 import BooksSectionLoader from '~/components/BooksSectionLoader'
 import ShouldRender from '~/components/ShouldRender'
 import StateWrapper from '~/components/StateWrapper'
@@ -17,7 +19,7 @@ const Search = () => {
     const bottomRef = useRef<HTMLDivElement | null>(null)
 
     const entry = useIntersectionObserver(bottomRef, {
-        threshold: 0.1,
+        threshold: 1,
     })
 
     const isVisible = !!entry?.isIntersecting
@@ -50,7 +52,7 @@ const Search = () => {
     )
 
     useEffect(() => {
-        if (isVisible) {
+        if (isVisible && hasNextPage) {
             fetchNextPage()
         }
     }, [isVisible])
@@ -66,15 +68,26 @@ const Search = () => {
                 isError={isError}
                 isLoading={isLoading}
                 NonEmpty={(books) => (
-                    <div>
-                        {books.map((book) => (
-                            <div key={book.id.toString()}>{book.title}</div>
-                        ))}
+                    <div className="max-w-base mx-auto">
+                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-12">
+                            {books.map((book) => (
+                                <BookCardWithAction
+                                    key={book.id.toString()}
+                                    id={book.id}
+                                    title={book.title}
+                                    price={book.price}
+                                    authors={book.authors}
+                                    coverImageUrl={book.coverImageUrl}
+                                />
+                            ))}
+                        </div>
                         <ShouldRender if={isFetchingNextPage}>
                             <BooksSectionLoader />
                         </ShouldRender>
                         <ShouldRender if={!hasNextPage}>
-                            <div>No more books</div>
+                            <div className="w-full bg-green-500/20 text-center p-3 rounded-lg font-semibold">
+                                No more books
+                            </div>
                         </ShouldRender>
                         <div ref={bottomRef} />
                     </div>

@@ -10,7 +10,6 @@ import { GoSearch } from 'react-icons/go'
 import useDebounce from '~/hooks/useDebounce'
 import useOnClickOutside from '~/hooks/useOnClickOutside'
 import { api } from '~/utils/api'
-import { type SearchPageQuery } from '~/pages/books/Search'
 
 const BooksSearch = () => {
     const searchRef = useRef<HTMLInputElement | null>(null)
@@ -73,7 +72,11 @@ const BooksSearch = () => {
     }
 
     return (
-        <form onSubmit={handleSubmit} className="relative w-full" ref={formRef}>
+        <form
+            onSubmit={handleSubmit}
+            className="relative w-full lg:min-w-[400px]"
+            ref={formRef}
+        >
             <div className="flex flex-row justify-between w-full bg-gray-300 items-center px-3 py-1 rounded-3xl relative">
                 <input
                     ref={searchRef}

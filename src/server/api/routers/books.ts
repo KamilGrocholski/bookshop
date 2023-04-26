@@ -28,17 +28,7 @@ export const getBooksByQuerySchema = z.object({
 
 export const booksPaginationSchema = z.object({
     itemsPerPage: z.number().int().nonnegative().default(25),
-    cursor: z
-        .string()
-        .nonempty()
-        .optional()
-        .transform((value) => {
-            if (value !== undefined) {
-                return BigInt(value)
-            }
-
-            return value
-        }),
+    cursor: z.bigint().optional(),
     query: z.string(),
 })
 
@@ -72,6 +62,18 @@ export const bookRouter = createTRPCRouter({
                         : undefined,
                 orderBy: {
                     id: 'desc',
+                },
+                select: {
+                    id: true,
+                    title: true,
+                    coverImageUrl: true,
+                    price: true,
+                    authors: {
+                        select: {
+                            id: true,
+                            name: true,
+                        },
+                    },
                 },
             })
 
