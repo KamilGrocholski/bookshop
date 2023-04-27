@@ -1,7 +1,6 @@
 import { useRouter } from 'next/router'
 import { useEffect, useMemo, useRef } from 'react'
-import BookCardWithAction from '~/components/Book/BookCardWithAction'
-import BooksSection from '~/components/BooksSection'
+import BooksListing from '~/components/BooksListing'
 import BooksSectionLoader from '~/components/BooksSectionLoader'
 import ShouldRender from '~/components/ShouldRender'
 import StateWrapper from '~/components/StateWrapper'
@@ -68,24 +67,13 @@ const Search = () => {
                 isError={isError}
                 isLoading={isLoading}
                 NonEmpty={(books) => (
-                    <div className="max-w-base mx-auto">
-                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-12">
-                            {books.map((book) => (
-                                <BookCardWithAction
-                                    key={book.id.toString()}
-                                    id={book.id}
-                                    title={book.title}
-                                    price={book.price}
-                                    authors={book.authors}
-                                    coverImageUrl={book.coverImageUrl}
-                                />
-                            ))}
-                        </div>
+                    <div className="mx-auto flex flex-col gap-8">
+                        <BooksListing books={books} />
                         <ShouldRender if={isFetchingNextPage}>
                             <BooksSectionLoader />
                         </ShouldRender>
                         <ShouldRender if={!hasNextPage}>
-                            <div className="w-full bg-green-500/20 text-center p-3 rounded-lg font-semibold">
+                            <div className="mt-12 w-full bg-green-500/20 text-center p-3 rounded-lg font-semibold">
                                 No more books
                             </div>
                         </ShouldRender>

@@ -1,11 +1,5 @@
 import BooksSearch from './BooksSearch'
-import Cart from './Cart/Cart'
-import ShouldRender from './ShouldRender'
-import { useAtom } from 'jotai'
 import Link from 'next/link'
-import { useRef } from 'react'
-import { isCartOpenAtom } from '~/atoms'
-import useOnClickOutside from '~/hooks/useOnClickOutside'
 
 const Logo = () => {
     return <Link href="/">Bookshop</Link>
@@ -65,13 +59,8 @@ const Sidebar = () => {
 }
 
 const Header = () => {
-    const [isCartOpen, setIsCartOpen] = useAtom(isCartOpenAtom)
-    const cartRef = useRef<HTMLDivElement | null>(null)
-
-    useOnClickOutside(cartRef, () => setIsCartOpen(false))
-
     return (
-        <header className="flex bg-white flex-col w-full sticky z-30 top-0 px-5 py-1">
+        <header className="flex bg-white flex-col w-full sticky z-30 top-0 px-5 py-1 border-b">
             <div className="relative h-16 w-full flex flex-wrap justify-between items-center">
                 <div className="order-1 md:order-none">
                     <Logo />
@@ -80,12 +69,7 @@ const Header = () => {
                     <button className="md:hidden">MENU</button>
                     <BooksSearch />
                 </div>
-                <div className="order-2 md:order-3">
-                    <button onClick={() => setIsCartOpen(true)}>Cart</button>
-                </div>
-                <ShouldRender if={isCartOpen}>
-                    <Cart ref={cartRef} />
-                </ShouldRender>
+                <div className="order-2 md:order-3"></div>
             </div>
             <div className="hidden md:flex">
                 <FastMenu />

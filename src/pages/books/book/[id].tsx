@@ -3,9 +3,9 @@ import { createServerSideHelpers } from '@trpc/react-query/server'
 import clsx from 'clsx'
 import { useAtom } from 'jotai'
 import {
-    GetStaticPaths,
-    GetStaticPropsContext,
-    InferGetStaticPropsType,
+    type GetStaticPaths,
+    type GetStaticPropsContext,
+    type InferGetStaticPropsType,
 } from 'next'
 import Head from 'next/head'
 import Image from 'next/image'

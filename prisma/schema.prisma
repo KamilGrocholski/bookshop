@@ -42,14 +42,15 @@ model Session {
 }
 
 model User {
-  id            String    @id @default(cuid())
+  id            String     @id @default(cuid())
   name          String?
-  email         String?   @unique
+  email         String?    @unique
   emailVerified DateTime?
   image         String?
   accounts      Account[]
   sessions      Session[]
   orders        Order[]
+  cart          CartItem[]
 }
 
 model VerificationToken {
@@ -112,6 +113,16 @@ model Order {
   createdAt DateTime @default(now())
 }
 
+model CartItem {
+  id       BigInt @id @default(autoincrement())
+  quantity Int
+
+  user   User   @relation(fields: [userId], references: [id])
+  userId String
+  book   Book   @relation(fields: [bookId], references: [id])
+  bookId BigInt
+}
+
 model Book {
   id            BigInt   @id @default(autoincrement())
   title         String
@@ -124,6 +135,7 @@ model Book {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
+  cartItems   CartItem[]
   authors     Author[]
   categories  Category[]
   orderItems  OrderItem[]
@@ -133,3 +145,4 @@ model Book {
   @@index([id])
   @@index([title])
 }
+
