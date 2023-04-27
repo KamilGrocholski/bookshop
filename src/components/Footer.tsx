@@ -10,7 +10,7 @@ const links = [
 const socialLinks = [
     { label: 'Twitter', href: 'twitter', icon: BsTwitter },
     { label: 'Facebook', href: 'facebook', icon: BsFacebook },
-    { label: 'Facebook', href: 'instagram', icon: BsInstagram },
+    { label: 'Instagram', href: 'instagram', icon: BsInstagram },
 ]
 
 const Footer = () => {

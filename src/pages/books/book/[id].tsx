@@ -1,7 +1,6 @@
 import { Book } from '@prisma/client'
 import { createServerSideHelpers } from '@trpc/react-query/server'
 import clsx from 'clsx'
-import { useAtom } from 'jotai'
 import {
     type GetStaticPaths,
     type GetStaticPropsContext,
@@ -11,9 +10,7 @@ import Head from 'next/head'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
-import { useMemo } from 'react'
 import SuperJSON from 'superjson'
-import { cartAtom } from '~/atoms'
 import Button from '~/components/Button'
 import StateWrapper from '~/components/StateWrapper'
 import MainLayout from '~/layouts/MainLayout'
@@ -257,35 +254,19 @@ const Details: React.FC<{ pairs: Record<string, string | number> }> = ({
 const BookForm: React.FC<{
     book: Pick<Book, 'id' | 'title' | 'coverImageUrl' | 'stock'>
 }> = ({ book: { stock, id, title, coverImageUrl } }) => {
-    const [cart, setCart] = useAtom(cartAtom)
+    const utils = api.useContext()
 
-    const isItemInCart = useMemo(() => {
-        return cart.items.find((item) => item.book.id === id)
-    }, [cart])
+    const addToCartMutation = api.cart.add.useMutation({
+        onSuccess() {
+            utils.cart.getCart.refetch()
+        },
+    })
 
     const handleAddToCart = (e: React.FormEvent) => {
         e.preventDefault()
 
-        if (isItemInCart) {
-            return
-        }
-
-        setCart((prev) => {
-            const newCart = {
-                items: [
-                    ...prev.items,
-                    {
-                        book: {
-                            id,
-                            title,
-                            coverImageUrl,
-                        },
-                        quantity: 1,
-                    },
-                ],
-            }
-
-            return newCart
+        addToCartMutation.mutate({
+            bookId: id,
         })
     }
 
