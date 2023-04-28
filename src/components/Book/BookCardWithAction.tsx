@@ -2,6 +2,7 @@ import Button from '../Button'
 import { Author, Book } from '@prisma/client'
 import Image from 'next/image'
 import Link from 'next/link'
+import { toast } from 'react-toastify'
 import { api } from '~/utils/api'
 
 export type BookCardWithActionProps = Pick<
@@ -23,9 +24,14 @@ const BookCardWithAction: React.FC<BookCardWithActionProps> = ({
     const addToCartMutation = api.cart.add.useMutation({
         onSuccess() {
             utils.cart.getCart.refetch()
+            toast('Book added to the cart', {
+                type: 'success',
+            })
         },
-        onError(error) {
-            console.error(error)
+        onError() {
+            toast('Book not added to the cart', {
+                type: 'error',
+            })
         },
     })
 

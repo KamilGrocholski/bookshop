@@ -5,11 +5,22 @@ import Image from 'next/image'
 
 import { api } from '~/utils/api'
 import StateWrapper from '../StateWrapper'
+import NumberInputCounter from '../NumberInputCounter'
+import Button from '../Button'
 
 const Cart = forwardRef<HTMLDivElement>((_, ref) => {
     const cartItemsQuery = api.cart.getCart.useQuery()
 
     const utils = api.useContext()
+
+    const setQuantityMutation = api.cart.setQuantity.useMutation({
+        onSuccess() {
+            utils.cart.getCart.refetch()
+        },
+        onError(error) {
+            console.error(error)
+        },
+    })
 
     const removeMutation = api.cart.remove.useMutation({
         onSuccess() {
@@ -26,6 +37,31 @@ const Cart = forwardRef<HTMLDivElement>((_, ref) => {
         })
     }
 
+    const handleSetQuantity = (bookId: bigint, quantity: number) => {
+        setQuantityMutation.mutate({
+            bookId,
+            quantity,
+        })
+    }
+
+    const handleIncrement = (bookId: bigint, currentQuantity: number) => {
+        setQuantityMutation.mutate({
+            bookId,
+            quantity: currentQuantity + 1,
+        })
+    }
+
+    const handleDecrement = (bookId: bigint, currentQuantity: number) => {
+        if (currentQuantity <= 1) {
+            return
+        }
+
+        setQuantityMutation.mutate({
+            bookId,
+            quantity: currentQuantity - 1,
+        })
+    }
+
     return (
         <div
             ref={ref}
@@ -35,6 +71,16 @@ const Cart = forwardRef<HTMLDivElement>((_, ref) => {
                 data={cartItemsQuery.data}
                 isLoading={cartItemsQuery.isLoading}
                 isError={cartItemsQuery.isError}
+                isEmpty={cartItemsQuery.data?.cart.length === 0}
+                Empty={<div>No items in the cart.</div>}
+                Error={
+                    <div>
+                        <span>An error has occured.</span>
+                        <Button onClick={() => cartItemsQuery.refetch()}>
+                            Try again
+                        </Button>
+                    </div>
+                }
                 NonEmpty={(data) => (
                     <ul className="flex flex-col divide-y overflow-y-scroll max-h-[30vh] p-3 overscroll-y-none">
                         {data.cart.map((item) => (
@@ -53,12 +99,38 @@ const Cart = forwardRef<HTMLDivElement>((_, ref) => {
                                 <span className="col-span-2">
                                     {item.book.title}
                                 </span>
-                                <button
-                                    className="col-span-1 flex justify-end"
-                                    onClick={() => handleRemove(item.book.id)}
-                                >
-                                    <FaTimes className="text-red-500" />
-                                </button>
+                                <form className="col-span-1 flex flex-row items-center">
+                                    <NumberInputCounter
+                                        value={item.quantity}
+                                        onChange={(e) =>
+                                            handleSetQuantity(
+                                                item.book.id,
+                                                e.target.valueAsNumber,
+                                            )
+                                        }
+                                        onDecrement={() =>
+                                            handleDecrement(
+                                                item.book.id,
+                                                item.quantity,
+                                            )
+                                        }
+                                        onIncrement={() =>
+                                            handleIncrement(
+                                                item.book.id,
+                                                item.quantity,
+                                            )
+                                        }
+                                    />
+                                    <button
+                                        type="button"
+                                        className="flex justify-end"
+                                        onClick={() =>
+                                            handleRemove(item.book.id)
+                                        }
+                                    >
+                                        <FaTimes className="text-red-500" />
+                                    </button>
+                                </form>
                             </li>
                         ))}
                     </ul>

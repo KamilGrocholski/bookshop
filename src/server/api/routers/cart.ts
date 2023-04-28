@@ -29,6 +29,7 @@ export const cartRouter = createTRPCRouter({
             select: {
                 cart: {
                     select: {
+                        quantity: true,
                         book: {
                             select: {
                                 id: true,
