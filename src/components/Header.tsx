@@ -1,10 +1,13 @@
 import BooksSearch from './BooksSearch'
-import Cart from './Cart/Cart'
-import ShouldRender from './ShouldRender'
-import { useAtom } from 'jotai'
 import Link from 'next/link'
-import { useRef } from 'react'
+import Cart from './Cart/Cart'
+import SessionStateWrapper from './SessionStateWrapper'
+import Button from './Button'
+import { FiShoppingCart } from 'react-icons/fi'
+import { useAtom } from 'jotai'
 import { isCartOpenAtom } from '~/atoms'
+import ShouldRender from './ShouldRender'
+import { useRef } from 'react'
 import useOnClickOutside from '~/hooks/useOnClickOutside'
 
 const Logo = () => {
@@ -71,7 +74,7 @@ const Header = () => {
     useOnClickOutside(cartRef, () => setIsCartOpen(false))
 
     return (
-        <header className="flex bg-white flex-col w-full sticky z-30 top-0 px-5 py-1">
+        <header className="flex bg-white flex-col w-full sticky z-30 top-0 px-5 py-1 border-b">
             <div className="relative h-16 w-full flex flex-wrap justify-between items-center">
                 <div className="order-1 md:order-none">
                     <Logo />
@@ -81,11 +84,30 @@ const Header = () => {
                     <BooksSearch />
                 </div>
                 <div className="order-2 md:order-3">
-                    <button onClick={() => setIsCartOpen(true)}>Cart</button>
+                    <SessionStateWrapper
+                        Guest={(signIn) => (
+                            <Button onClick={signIn}>Sign in</Button>
+                        )}
+                        LoggedIn={(signOut) => (
+                            <div className="flex flex-row gap-2 items-center">
+                                <button onClick={() => signOut()}>
+                                    Sign out
+                                </button>
+                                <Button
+                                    onClick={() =>
+                                        setIsCartOpen((prev) => !prev)
+                                    }
+                                    tooltip="Shopping cart"
+                                >
+                                    <FiShoppingCart />
+                                </Button>
+                                <ShouldRender if={isCartOpen}>
+                                    <Cart ref={cartRef} />
+                                </ShouldRender>
+                            </div>
+                        )}
+                    />
                 </div>
-                <ShouldRender if={isCartOpen}>
-                    <Cart ref={cartRef} />
-                </ShouldRender>
             </div>
             <div className="hidden md:flex">
                 <FastMenu />

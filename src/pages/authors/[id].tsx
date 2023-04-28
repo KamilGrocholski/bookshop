@@ -1,15 +1,16 @@
 import { Author } from '@prisma/client'
 import { createServerSideHelpers } from '@trpc/react-query/server'
 import {
-    GetStaticPaths,
-    GetStaticPropsContext,
-    InferGetStaticPropsType,
+    type GetStaticPaths,
+    type GetStaticPropsContext,
+    type InferGetStaticPropsType,
 } from 'next'
+import Head from 'next/head'
 import Image from 'next/image'
 import { useRouter } from 'next/router'
 import React from 'react'
 import SuperJSON from 'superjson'
-import BookCardWithAction from '~/components/Book/BookCardWithAction'
+import BooksListing from '~/components/BooksListing'
 import StateWrapper from '~/components/StateWrapper'
 import MainLayout from '~/layouts/MainLayout'
 import { appRouter } from '~/server/api/root'
@@ -124,34 +125,71 @@ export default function AuthorPage(
                 isLoading={authorQuery.isLoading}
                 isError={authorQuery.isError}
                 NonEmpty={(author) => (
-                    <div className="flex flex-col gap-12 mx-auto">
-                        <div className="flex flex-col ">
-                            <h1>{author.name}</h1>
-                            <figure>
-                                <Image
-                                    width={350}
-                                    height={300}
-                                    src={author.imageUrl ?? ''}
-                                    alt={author.name}
-                                />
-                            </figure>
-                        </div>
-                        <section>
-                            <h2>About</h2>
-                            <p>{author.description}</p>
-                        </section>
-                        <section>
-                            <h2>Titles</h2>
-                            <div className="grid md:grid-cols-3 grid-cols-1 gap-8">
-                                {author.books.map((book) => (
-                                    <BookCardWithAction
-                                        {...book}
-                                        key={book.id.toString()}
+                    <>
+                        <Head>
+                            <title>{author.name}</title>
+                            <meta
+                                name="description"
+                                content={author.description}
+                            />
+                            <meta property="og:type" content="author" />
+                            <meta property="og:name" content={author.name} />
+                            <meta
+                                property="og:description"
+                                content={author.description}
+                            />
+                            <meta
+                                property="og:image"
+                                content={author.imageUrl ?? ''}
+                            />
+                            <meta
+                                property="og:image:alt"
+                                content={author.name}
+                            />
+                            <meta property="twitter:card" content="summary" />
+                            <meta
+                                property="twitter:title"
+                                content={author.name}
+                            />
+                            <meta
+                                property="twitter:description"
+                                content={author.description}
+                            />
+                            <meta
+                                property="twitter:image"
+                                content={author.imageUrl ?? ''}
+                            />
+                            <meta
+                                property="twitter:image:alt"
+                                content={author.name}
+                            />
+                            <meta
+                                property="twitter:card:alt"
+                                content="Author image"
+                            />
+                        </Head>
+                        <div className="flex flex-col gap-12 mx-auto">
+                            <div className="flex flex-col ">
+                                <h1>{author.name}</h1>
+                                <figure>
+                                    <Image
+                                        width={350}
+                                        height={300}
+                                        src={author.imageUrl ?? ''}
+                                        alt={author.name}
                                     />
-                                ))}
+                                </figure>
                             </div>
-                        </section>
-                    </div>
+                            <section>
+                                <h2>About</h2>
+                                <p>{author.description}</p>
+                            </section>
+                            <section>
+                                <h2>Titles</h2>
+                                <BooksListing books={author.books} />
+                            </section>
+                        </div>
+                    </>
                 )}
             />
         </MainLayout>

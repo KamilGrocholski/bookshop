@@ -1,17 +1,4 @@
-import { atom } from "jotai";
-import { atomWithStorage } from "jotai/utils";
+import { atom } from 'jotai'
+import { atomWithToggle } from './utils'
 
-export type Cart = {
-  items: {
-    book: {
-      id: bigint;
-      title: string;
-      coverImageUrl: string;
-    };
-    quantity: number;
-  }[];
-};
-
-export const cartAtom = atomWithStorage<Cart>("cart", { items: [] });
-
-export const isCartOpenAtom = atom<boolean>(false);
+export const isCartOpenAtom = atom(false)
