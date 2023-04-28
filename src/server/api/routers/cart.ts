@@ -1,6 +1,7 @@
 import { z } from 'zod'
 import { createTRPCRouter, protectedProcedure } from '../trpc'
 import { bookBase } from '~/schemes/base/bookBase.scheme'
+import { TRPCError } from '@trpc/server'
 
 export const cartItemBase = {
     bookId: bookBase.id,
@@ -21,8 +22,15 @@ export const setQuantitySchema = z.object({
 })
 
 export const cartRouter = createTRPCRouter({
-    getCart: protectedProcedure.query(({ ctx }) => {
-        return ctx.prisma.user.findUnique({
+    clear: protectedProcedure.mutation(({ ctx }) => {
+        return ctx.prisma.cartItem.deleteMany({
+            where: {
+                userId: ctx.session.user.id,
+            },
+        })
+    }),
+    getCart: protectedProcedure.query(async ({ ctx }) => {
+        const userCart = await ctx.prisma.user.findUnique({
             where: {
                 id: ctx.session.user.id,
             },
@@ -35,12 +43,42 @@ export const cartRouter = createTRPCRouter({
                                 id: true,
                                 title: true,
                                 coverImageUrl: true,
+                                price: true,
                             },
                         },
                     },
                 },
             },
         })
+
+        if (!userCart) {
+            throw new TRPCError({ code: 'NOT_FOUND' })
+        }
+
+        let totalPrice = 0
+
+        type SingleResult = (typeof userCart)['cart'][number] & {
+            totalItemPrice: number
+        }
+
+        type Result = SingleResult[]
+
+        const resultCart: Result = userCart.cart.map((item) => {
+            let itemTotalPrice = item.quantity * item.book.price
+
+            totalPrice += itemTotalPrice
+
+            return {
+                book: item.book,
+                quantity: item.quantity,
+                totalItemPrice: itemTotalPrice,
+            }
+        })
+
+        return {
+            totalPrice,
+            cart: resultCart,
+        }
     }),
     add: protectedProcedure.input(addSchema).mutation(({ ctx, input }) => {
         const { bookId } = input

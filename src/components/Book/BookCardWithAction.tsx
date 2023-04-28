@@ -4,6 +4,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { toast } from 'react-toastify'
 import { api } from '~/utils/api'
+import formatPrice from '~/utils/formatPrice'
 
 export type BookCardWithActionProps = Pick<
     Book,
@@ -67,7 +68,9 @@ const BookCardWithAction: React.FC<BookCardWithActionProps> = ({
                 </div>
             </div>
             <div className="flex flex-col gap-1">
-                <p className="text-center font-semibold">{price} $</p>
+                <p className="text-center font-semibold">
+                    {formatPrice(price)}
+                </p>
                 <Button onClick={handleAddToCart}>Add to cart</Button>
             </div>
         </article>
