@@ -51,6 +51,7 @@ model User {
   sessions      Session[]
   orders        Order[]
   cart          CartItem[]
+  address       Address?
 }
 
 model VerificationToken {
@@ -59,6 +60,24 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+}
+
+model Address {
+  country String
+  state   String
+  street  String
+  city    String
+  zip     String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  orders Order[]
+
+  @@unique(userId)
 }
 
 model Author {
@@ -106,11 +125,13 @@ model Order {
   totalPrice Float
   status     OrderStatus
 
-  items  OrderItem[]
-  user   User        @relation(fields: [userId], references: [id])
-  userId String
+  address Address     @relation(fields: [addressUserId], references: [userId])
+  items   OrderItem[]
+  user    User        @relation(fields: [userId], references: [id])
+  userId  String
 
-  createdAt DateTime @default(now())
+  createdAt     DateTime @default(now())
+  addressUserId String
 }
 
 model CartItem {

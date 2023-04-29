@@ -1,10 +1,12 @@
 import Button from '../Button'
 import { Author, Book } from '@prisma/client'
+import { useSession } from 'next-auth/react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { toast } from 'react-toastify'
 import { api } from '~/utils/api'
 import formatPrice from '~/utils/formatPrice'
+import { handleSignIn } from '../SessionStateWrapper'
 
 export type BookCardWithActionProps = Pick<
     Book,
@@ -20,6 +22,8 @@ const BookCardWithAction: React.FC<BookCardWithActionProps> = ({
     title,
     authors,
 }) => {
+    const { data: session } = useSession()
+
     const utils = api.useContext()
 
     const addToCartMutation = api.cart.add.useMutation({
@@ -37,9 +41,27 @@ const BookCardWithAction: React.FC<BookCardWithActionProps> = ({
     })
 
     function handleAddToCart() {
-        addToCartMutation.mutate({
-            bookId: id,
-        })
+        if (session?.user) {
+            const isAlreadyInCart = !!utils.cart.getCart
+                .getData()
+                ?.cart.some((item) => item.book.id === id)
+
+            if (isAlreadyInCart) {
+                toast('Book is already in the cart.', {
+                    type: 'info',
+                })
+
+                return
+            }
+
+            addToCartMutation.mutate({
+                bookId: id,
+            })
+
+            return
+        }
+
+        handleSignIn()
     }
 
     return (

@@ -9,7 +9,7 @@ export type SessionStateWrapperProps = {
     LoggedIn: (signOut: typeof _signOut) => React.ReactElement
 }
 
-function handleSignIn() {
+export function handleSignIn() {
     _signIn('google')
 }
 

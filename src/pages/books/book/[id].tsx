@@ -13,6 +13,7 @@ import { useRouter } from 'next/router'
 import SuperJSON from 'superjson'
 import Button from '~/components/Button'
 import StateWrapper from '~/components/StateWrapper'
+import useCart from '~/hooks/useCart'
 import MainLayout from '~/layouts/MainLayout'
 import { appRouter } from '~/server/api/root'
 import { createInnerTRPCContext } from '~/server/api/trpc'
@@ -254,24 +255,10 @@ const Details: React.FC<{ pairs: Record<string, string | number> }> = ({
 const BookForm: React.FC<{
     book: Pick<Book, 'id' | 'title' | 'coverImageUrl' | 'stock'>
 }> = ({ book: { stock, id, title, coverImageUrl } }) => {
-    const utils = api.useContext()
-
-    const addToCartMutation = api.cart.add.useMutation({
-        onSuccess() {
-            utils.cart.getCart.refetch()
-        },
-    })
-
-    const handleAddToCart = (e: React.FormEvent) => {
-        e.preventDefault()
-
-        addToCartMutation.mutate({
-            bookId: id,
-        })
-    }
+    const { add } = useCart()
 
     return (
-        <form onSubmit={handleAddToCart}>
+        <form onSubmit={() => add(id)}>
             <div
                 className={clsx(
                     'uppercase font-semibold',

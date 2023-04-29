@@ -106,7 +106,7 @@ const BooksSearch = () => {
                     data={booksQuery.data}
                     isLoading={booksQuery.isFetching}
                     isError={booksQuery.isError}
-                    isEmpty={booksQuery?.data?.books.length === 0}
+                    isEmpty={booksQuery.data?.books.length === 0}
                     Error={
                         <div className="flex flex-col gap-1 p-4 items-center">
                             <span>An error has occured.</span>
