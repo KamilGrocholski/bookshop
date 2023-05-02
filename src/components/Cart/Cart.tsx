@@ -1,4 +1,5 @@
 import { forwardRef } from 'react'
+import Link from 'next/link'
 
 import { api } from '~/utils/api'
 import StateWrapper from '../StateWrapper'
@@ -6,14 +7,11 @@ import Button from '../Button'
 import formatPrice from '~/utils/formatPrice'
 import CartItem from './CartItem'
 import useCart from '~/hooks/useCart'
-import Link from 'next/link'
 
 const Cart = forwardRef<HTMLDivElement>((_, ref) => {
     const cartItemsQuery = api.cart.getCart.useQuery()
 
-    const { add, resetCart } = useCart()
-
-    const utils = api.useContext()
+    const { resetCart } = useCart()
 
     return (
         <div
