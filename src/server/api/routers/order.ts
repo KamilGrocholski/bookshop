@@ -171,4 +171,21 @@ export const orderRouter = createTRPCRouter({
                 },
             })
         }),
+    getMyOrders: protectedProcedure.query(({ ctx }) => {
+        return ctx.prisma.order.findMany({
+            orderBy: {
+                createdAt: 'desc',
+            },
+            where: {
+                userId: ctx.session.user.id,
+            },
+            include: {
+                items: {
+                    include: {
+                        book: true,
+                    },
+                },
+            },
+        })
+    }),
 })

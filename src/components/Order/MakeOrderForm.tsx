@@ -16,13 +16,21 @@ import Button from '../Button'
 import { COUNTRIES } from '~/schemes/base/orderBase.scheme'
 
 const MakeOrderForm = () => {
+    const utils = api.useContext()
+
     const [isPaid, setIsPaid] = useState<boolean>(false)
 
     const makeOrderMutation = api.order.make.useMutation({
+        onSuccess() {},
+        onError() {},
+    })
+
+    const paymantMutation = api.order.payment.useMutation({
         onSuccess() {
             setIsPaid(true)
+            utils.cart.getCart.refetch()
+            utils.order.getMyOrders.refetch()
         },
-        onError() {},
     })
 
     const onValid: SubmitHandler<z.output<typeof makeOrderSchema>> = async (
@@ -30,8 +38,10 @@ const MakeOrderForm = () => {
         e,
     ) => {
         e?.preventDefault()
-        console.log(data)
-        await makeOrderMutation.mutateAsync(data)
+        const newOrder = await makeOrderMutation.mutateAsync(data)
+        await paymantMutation.mutateAsync({
+            orderId: newOrder[0].id,
+        })
     }
 
     const onError: SubmitErrorHandler<z.output<typeof makeOrderSchema>> = (
@@ -39,7 +49,6 @@ const MakeOrderForm = () => {
         e,
     ) => {
         e?.preventDefault()
-        console.error(data)
     }
 
     const { control, register, handleSubmit } = useForm<
