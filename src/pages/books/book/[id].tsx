@@ -13,6 +13,7 @@ import { useRouter } from 'next/router'
 import SuperJSON from 'superjson'
 import Button from '~/components/Button'
 import StateWrapper from '~/components/StateWrapper'
+import useCart from '~/hooks/useCart'
 import MainLayout from '~/layouts/MainLayout'
 import { appRouter } from '~/server/api/root'
 import { createInnerTRPCContext } from '~/server/api/trpc'
@@ -209,6 +210,16 @@ export default function BookPage(
                                     />
                                 </div>
                                 <section>
+                                    <h2>Categories</h2>
+                                    <ul className="text-gray-500 text-lg">
+                                        {book.categories.map((category) => (
+                                            <li key={category.id.toString()}>
+                                                {category.name}
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </section>
+                                <section>
                                     <h2>Description</h2>
                                     <p>{book.description}</p>
                                 </section>
@@ -218,7 +229,7 @@ export default function BookPage(
                                         pairs={{
                                             Price: `${book.price} $`,
                                             Publisher: book.publisher.name,
-                                            PublishDate: book.publishedAt
+                                            'Publish date': book.publishedAt
                                                 .toISOString()
                                                 .slice(0, 10),
                                             Pages: book.pages,
@@ -242,7 +253,7 @@ const Details: React.FC<{ pairs: Record<string, string | number> }> = ({
             {Object.entries(pairs).map(([key, value]) => (
                 <li key={key}>
                     <p className="grid grid-cols-2">
-                        <span className="text-end mr-2">{key}</span>
+                        <span className="text-end mr-2 italic">{key}</span>
                         <span className="text-start">{value}</span>
                     </p>
                 </li>
@@ -254,24 +265,10 @@ const Details: React.FC<{ pairs: Record<string, string | number> }> = ({
 const BookForm: React.FC<{
     book: Pick<Book, 'id' | 'title' | 'coverImageUrl' | 'stock'>
 }> = ({ book: { stock, id, title, coverImageUrl } }) => {
-    const utils = api.useContext()
-
-    const addToCartMutation = api.cart.add.useMutation({
-        onSuccess() {
-            utils.cart.getCart.refetch()
-        },
-    })
-
-    const handleAddToCart = (e: React.FormEvent) => {
-        e.preventDefault()
-
-        addToCartMutation.mutate({
-            bookId: id,
-        })
-    }
+    const { add } = useCart()
 
     return (
-        <form onSubmit={handleAddToCart}>
+        <form onSubmit={() => add(id)}>
             <div
                 className={clsx(
                     'uppercase font-semibold',
@@ -281,8 +278,9 @@ const BookForm: React.FC<{
                 {stock > 0 ? 'available' : 'not available'}
             </div>
             <div className="flex gap-3">
-                <Button type="submit">Add to cart</Button>
-                <Button variant="secondary">Add to whishlist</Button>
+                <Button size="lg" type="submit">
+                    Add to cart
+                </Button>
             </div>
         </form>
     )

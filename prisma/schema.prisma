@@ -106,6 +106,17 @@ model Order {
   totalPrice Float
   status     OrderStatus
 
+  name    String
+  surname String
+  phone   String
+  email   String
+
+  country String
+  state   String
+  street  String
+  city    String
+  zip     String
+
   items  OrderItem[]
   user   User        @relation(fields: [userId], references: [id])
   userId String

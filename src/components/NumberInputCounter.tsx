@@ -12,8 +12,8 @@ const NumberInputCounter: React.FC<NumberInputCounterProps> = ({
     value,
 }) => {
     return (
-        <div className="custom-number-input h-10 w-32 flex flex-row items-center">
-            <div className="flex flex-row h-10 w-full rounded-lg relative bg-transparent mt-1">
+        <div className="custom-number-input h-8 w-24 flex flex-row items-center">
+            <div className="flex flex-row h-8 w-full rounded-lg relative bg-transparent mt-1">
                 <button
                     type="button"
                     data-action="decrement"

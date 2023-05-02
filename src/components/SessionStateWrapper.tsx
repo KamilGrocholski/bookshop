@@ -1,3 +1,4 @@
+import { type Session } from 'next-auth'
 import {
     signIn as _signIn,
     signOut as _signOut,
@@ -6,10 +7,13 @@ import {
 
 export type SessionStateWrapperProps = {
     Guest: (signIn: typeof handleSignIn) => React.ReactElement
-    LoggedIn: (signOut: typeof _signOut) => React.ReactElement
+    LoggedIn: (
+        signOut: typeof _signOut,
+        sessionData: Session,
+    ) => React.ReactElement
 }
 
-function handleSignIn() {
+export function handleSignIn() {
     _signIn('google')
 }
 
@@ -20,7 +24,7 @@ const SessionStateWrapper: React.FC<SessionStateWrapperProps> = ({
     const { data: session } = useSession()
 
     if (session?.user) {
-        return LoggedIn(_signOut)
+        return LoggedIn(_signOut, session)
     }
 
     return Guest(handleSignIn)

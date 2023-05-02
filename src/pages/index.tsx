@@ -1,7 +1,8 @@
-import { createServerSideHelpers } from '@trpc/react-query/server'
 import { type GetStaticPropsContext, type InferGetStaticPropsType } from 'next'
 import Head from 'next/head'
 import SuperJSON from 'superjson'
+import { createServerSideHelpers } from '@trpc/react-query/server'
+
 import BooksListing from '~/components/BooksListing'
 import BooksSectionLoader from '~/components/BooksSectionLoader'
 import StateWrapper from '~/components/StateWrapper'
@@ -44,10 +45,6 @@ export default function HomePage(
         take,
         lastDays,
     })
-
-    // const recentlyAddedQuery = api.book.getRecentlyAdded.useQuery({
-    //     take: 15,
-    // })
 
     return (
         <>
