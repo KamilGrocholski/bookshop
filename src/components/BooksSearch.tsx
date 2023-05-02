@@ -131,7 +131,7 @@ const BooksSearch = () => {
                     }
                     NonEmpty={({ books, count }) => (
                         <div className="flex flex-col gap-1">
-                            <ul className="flex flex-col gap-2 max-h-[50vh] overflow-y-scroll overscroll-y-none px-2">
+                            <ul className="flex flex-col gap-2 max-h-[50vh] overflow-y-scroll overscroll-y-none px-2 divide-y divide-gray-300">
                                 {books.map((book) => (
                                     <Link
                                         onClick={() => {

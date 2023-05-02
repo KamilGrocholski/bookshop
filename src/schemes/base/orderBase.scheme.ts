@@ -1,9 +1,11 @@
 import type { Order } from '@prisma/client'
 import { z } from 'zod'
 
+export const COUNTRIES = ['Poland', 'Germany', 'Finland', 'USA'] as const
+
 export const ORDER_STATUSES = ['PENDING', 'SHIPPING', 'DELIVERED'] as const
 
-export const addresZipRegex = /^\d{5}-\d{3}$/
+// export const addresZipRegex = /^\\d{5|2}-\\d{3}$/
 
 export const phoneRegex = new RegExp(
     /^([+]?[\s0-9]+)?(\d{3}|[(]?[0-9]+[)])?([-]?[\s]?[0-9])+$/,
@@ -22,10 +24,10 @@ export const orderBase = {
         phone: z.string().regex(phoneRegex),
     }),
     address: z.object({
-        country: z.string().min(2).max(50),
+        country: z.enum(COUNTRIES),
         state: z.string().min(2).max(50),
         city: z.string().min(2).max(50),
-        zip: z.string().regex(addresZipRegex),
+        zip: z.string(),
         street: z.string().min(2).max(50),
     }),
 }
