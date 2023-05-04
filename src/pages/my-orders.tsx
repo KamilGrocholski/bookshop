@@ -1,4 +1,5 @@
 import Image from 'next/image'
+import Link from 'next/link'
 
 import StateWrapper from '~/components/StateWrapper'
 import MainLayout from '~/layouts/MainLayout'
@@ -73,8 +74,10 @@ const OrderItem: React.FC<
     RouterOutputs['order']['getMyOrders'][number]['items'][number]
 > = (item) => {
     return (
-        <li className="flex flex-row items-center">
-            <div>
+        <li className="flex flex-row items-center gap-5">
+            <div className="font-semibold text-xl">{item.quantity}</div>
+            <div className="font-semibold text-xl">X</div>
+            <Link href={`/books/book/${item.book.id}`}>
                 <figure>
                     <Image
                         className="h-auto w-auto"
@@ -85,7 +88,7 @@ const OrderItem: React.FC<
                     />
                     <figcaption>{item.book.title}</figcaption>
                 </figure>
-            </div>
+            </Link>
         </li>
     )
 }

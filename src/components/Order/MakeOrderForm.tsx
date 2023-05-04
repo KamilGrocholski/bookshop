@@ -74,24 +74,47 @@ const MakeOrderForm = () => {
                     onSubmit={handleSubmit(onValid, onError)}
                     className="flex flex-col gap-2"
                 >
-                    <TextInput label="Name" {...register('person.name')} />
+                    <TextInput
+                        label="Name"
+                        placeholder="Kamil"
+                        {...register('person.name')}
+                    />
                     <TextInput
                         label="Surname"
+                        placeholder="Grocholski"
                         {...register('person.surname')}
                     />
                     <TextInput
                         label="Address e-mail"
+                        placeholder="kgrocholski@gmail.com"
                         {...register('person.email')}
                     />
                     <TextInput
                         label="Phone number"
+                        placeholder="731564879"
                         {...register('person.phone')}
                     />
 
-                    <TextInput label="City" {...register('address.city')} />
-                    <TextInput label="Street" {...register('address.street')} />
-                    <TextInput label="State" {...register('address.state')} />
-                    <TextInput label="Zip code" {...register('address.zip')} />
+                    <TextInput
+                        label="City"
+                        placeholder="Imperium Kisiela"
+                        {...register('address.city')}
+                    />
+                    <TextInput
+                        label="Street"
+                        placeholder="Gdzieś tam 420/69"
+                        {...register('address.street')}
+                    />
+                    <TextInput
+                        label="State"
+                        placeholder="Karpaciepod"
+                        {...register('address.state')}
+                    />
+                    <TextInput
+                        label="Zip code"
+                        placeholder="69-420"
+                        {...register('address.zip')}
+                    />
 
                     <Controller
                         render={({ field }) => (
@@ -115,7 +138,11 @@ const MakeOrderForm = () => {
                         defaultValue={COUNTRIES[0]}
                     />
 
-                    <Button type="submit" className="mt-8 w-full">
+                    <Button
+                        type="submit"
+                        className="mt-8 w-full"
+                        disabled={paymantMutation.isLoading}
+                    >
                         Confirm
                     </Button>
                 </form>

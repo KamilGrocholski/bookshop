@@ -17,8 +17,8 @@ const TextInput = forwardRef<HTMLInputElement, TextInputProps>((props, ref) => {
                 </label>
             </ShouldRender>
             <input
-                name={id}
-                className="border boder-black"
+                id={id}
+                className="border boder-black px-1"
                 type="text"
                 ref={ref}
                 {...rest}

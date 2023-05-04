@@ -3,11 +3,11 @@ import { TRPCError } from '@trpc/server'
 
 import { createTRPCRouter, protectedProcedure } from '../trpc'
 import { orderBase } from '~/schemes/base/orderBase.scheme'
+import sleep from '~/utils/sleep'
 
 export const makeOrderSchema = z.object({
     person: orderBase.person,
     address: orderBase.address,
-    // books: z.map(bookBase.id, z.number().int().positive()),
 })
 
 export const updateOrderStatusSchema = z.object({
@@ -42,6 +42,11 @@ export const orderRouter = createTRPCRouter({
 
             if (!cartQuery) {
                 throw new TRPCError({ code: 'NOT_FOUND' })
+            }
+
+            // throw an error when there are no items in the cart
+            if (cartQuery.cart.length === 0) {
+                throw new TRPCError({ code: 'FORBIDDEN' })
             }
 
             // get booksIds array for next query
@@ -160,7 +165,7 @@ export const orderRouter = createTRPCRouter({
             }
 
             // simulate payment delay
-            await new Promise((res) => setTimeout(res, 2000))
+            await sleep(2000)
 
             return await ctx.prisma.order.update({
                 where: {
