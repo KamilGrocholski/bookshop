@@ -1,15 +1,18 @@
+import Link from 'next/link'
+import Image from 'next/image'
+import { useRouter } from 'next/router'
+import { useRef, useState } from 'react'
+
+import clsx from 'clsx'
+import { GoSearch } from 'react-icons/go'
+
 import Button from './Button'
 import Loader from './Loader'
 import StateWrapper from './StateWrapper'
-import clsx from 'clsx'
-import Image from 'next/image'
-import Link from 'next/link'
-import { useRouter } from 'next/router'
-import { useRef, useState } from 'react'
-import { GoSearch } from 'react-icons/go'
 import useDebounce from '~/hooks/useDebounce'
 import useOnClickOutside from '~/hooks/useOnClickOutside'
 import { api } from '~/utils/api'
+import ShouldRender from './ShouldRender'
 
 const BooksSearch = () => {
     const searchRef = useRef<HTMLInputElement | null>(null)
@@ -68,6 +71,12 @@ const BooksSearch = () => {
                 e.preventDefault()
                 setShouldShowHints(false)
                 return
+            case 'Enter':
+                setShouldShowHints(false)
+                return
+            default:
+                setShouldShowHints(true)
+                return
         }
     }
 
@@ -118,8 +127,9 @@ const BooksSearch = () => {
                     Empty={
                         <div className="flex flex-col gap-1 p-4 items-center">
                             {query.length === 0 ? (
-                                <span>Type anything...</span>
-                            ) : (
+                                <span>Type anything</span>
+                            ) : booksQuery.isFetching ||
+                              booksQuery.isLoading ? null : (
                                 <span>No results</span>
                             )}
                         </div>

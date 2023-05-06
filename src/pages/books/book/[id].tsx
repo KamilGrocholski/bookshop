@@ -22,6 +22,7 @@ import { createInnerTRPCContext } from '~/server/api/trpc'
 import { prisma } from '~/server/db'
 import { api } from '~/utils/api'
 import getSecondsFrom from '~/utils/getSecondsFrom'
+import formatPrice from '~/utils/formatPrice'
 
 // 3 hour in seconds
 export const revalidate = 60 * 60 * 3
@@ -230,7 +231,7 @@ export default function BookPage(
                                     <h2>Details</h2>
                                     <Details
                                         pairs={{
-                                            Price: `${book.price} $`,
+                                            Price: formatPrice(book.price),
                                             Publisher: book.publisher.name,
                                             'Publish date': book.publishedAt
                                                 .toISOString()

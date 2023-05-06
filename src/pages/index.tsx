@@ -52,7 +52,7 @@ export default function HomePage(
                 <title>Bookshop</title>
                 <meta name="description" content="Buy any books." />
             </Head>
-            <MainLayout>
+            <MainLayout heroImage={true}>
                 <StateWrapper
                     data={bestSellersQuery.data}
                     isLoading={bestSellersQuery.isLoading}
