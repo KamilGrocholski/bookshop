@@ -8,9 +8,15 @@ import {
 export type SessionStateWrapperProps = {
     Guest: (signIn: typeof handleSignIn) => React.ReactElement
     LoggedIn: (
-        signOut: typeof _signOut,
+        signOut: typeof handleSignOut,
         sessionData: Session,
     ) => React.ReactElement
+}
+
+export function handleSignOut() {
+    _signOut({
+        redirect: true,
+    })
 }
 
 export function handleSignIn() {
@@ -24,7 +30,7 @@ const SessionStateWrapper: React.FC<SessionStateWrapperProps> = ({
     const { data: session } = useSession()
 
     if (session?.user) {
-        return LoggedIn(_signOut, session)
+        return LoggedIn(handleSignOut, session)
     }
 
     return Guest(handleSignIn)

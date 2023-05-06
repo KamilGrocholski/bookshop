@@ -43,7 +43,7 @@ const Search = () => {
     } = api.book.booksPagination.useInfiniteQuery(
         {
             query: bookQuery,
-            itemsPerPage: 3,
+            itemsPerPage: 15,
         },
         {
             getNextPageParam: (lastPage) => lastPage.nextCursor,
@@ -57,8 +57,8 @@ const Search = () => {
     }, [isVisible])
 
     const booksToShow = useMemo(() => {
-        return data?.pages.flatMap((page) => page.books)
-    }, [data])
+        return data?.pages.flatMap((page) => page.books) ?? []
+    }, [data?.pages])
 
     return (
         <MainLayout>
@@ -68,6 +68,10 @@ const Search = () => {
                 isLoading={isLoading}
                 NonEmpty={(books) => (
                     <div className="mx-auto flex flex-col gap-8">
+                        <div className="flex flex-row items-center gap-3 text-3xl">
+                            <span className="font-semibold">Results for:</span>
+                            <span className="italic">{bookQuery}</span>
+                        </div>
                         <BooksListing books={books} />
                         <ShouldRender if={isFetchingNextPage}>
                             <BooksSectionLoader />

@@ -41,18 +41,24 @@ export const bookRouter = createTRPCRouter({
             const books = await ctx.prisma.book.findMany({
                 take: itemsPerPage + 1,
                 where: {
-                    title: {
-                        contains: query,
-                        mode: 'insensitive',
-                    },
-                    authors: {
-                        some: {
-                            name: {
+                    OR: [
+                        {
+                            title: {
                                 contains: query,
                                 mode: 'insensitive',
                             },
                         },
-                    },
+                        {
+                            authors: {
+                                some: {
+                                    name: {
+                                        contains: query,
+                                        mode: 'insensitive',
+                                    },
+                                },
+                            },
+                        },
+                    ],
                 },
                 cursor:
                     cursor !== undefined

@@ -3,11 +3,11 @@ import { TRPCError } from '@trpc/server'
 
 import { createTRPCRouter, protectedProcedure } from '../trpc'
 import { orderBase } from '~/schemes/base/orderBase.scheme'
+import sleep from '~/utils/sleep'
 
 export const makeOrderSchema = z.object({
     person: orderBase.person,
     address: orderBase.address,
-    // books: z.map(bookBase.id, z.number().int().positive()),
 })
 
 export const updateOrderStatusSchema = z.object({
@@ -17,6 +17,11 @@ export const updateOrderStatusSchema = z.object({
 
 export const paymentSchema = z.object({
     orderId: orderBase.id,
+})
+
+export const ordersPaginationSchema = z.object({
+    itemsPerPage: z.number().int().nonnegative(),
+    page: z.number().int().nonnegative(),
 })
 
 export const orderRouter = createTRPCRouter({
@@ -42,6 +47,11 @@ export const orderRouter = createTRPCRouter({
 
             if (!cartQuery) {
                 throw new TRPCError({ code: 'NOT_FOUND' })
+            }
+
+            // throw an error when there are no items in the cart
+            if (cartQuery.cart.length === 0) {
+                throw new TRPCError({ code: 'FORBIDDEN' })
             }
 
             // get booksIds array for next query
@@ -160,7 +170,7 @@ export const orderRouter = createTRPCRouter({
             }
 
             // simulate payment delay
-            await new Promise((res) => setTimeout(res, 2000))
+            await sleep(2000)
 
             return await ctx.prisma.order.update({
                 where: {
@@ -171,21 +181,46 @@ export const orderRouter = createTRPCRouter({
                 },
             })
         }),
-    getMyOrders: protectedProcedure.query(({ ctx }) => {
-        return ctx.prisma.order.findMany({
-            orderBy: {
-                createdAt: 'desc',
-            },
-            where: {
-                userId: ctx.session.user.id,
-            },
-            include: {
-                items: {
-                    include: {
-                        book: true,
+    ordersPagination: protectedProcedure
+        .input(ordersPaginationSchema)
+        .query(async ({ ctx, input }) => {
+            const { itemsPerPage, page } = input
+
+            const ordersCount = await ctx.prisma.order.count({
+                where: {
+                    userId: ctx.session.user.id,
+                },
+            })
+
+            const orders = await ctx.prisma.order.findMany({
+                skip: page * itemsPerPage,
+                take: itemsPerPage,
+                orderBy: {
+                    createdAt: 'desc',
+                },
+                where: {
+                    userId: ctx.session.user.id,
+                },
+                include: {
+                    items: {
+                        include: {
+                            book: true,
+                        },
                     },
                 },
-            },
-        })
-    }),
+            })
+
+            if (!ordersCount) {
+                throw new TRPCError({ code: 'NOT_FOUND' })
+            }
+
+            if (!orders) {
+                throw new TRPCError({ code: 'NOT_FOUND' })
+            }
+
+            return {
+                orders,
+                totalPages: Math.round(ordersCount / itemsPerPage),
+            }
+        }),
 })

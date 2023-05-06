@@ -1,5 +1,7 @@
 import Link from 'next/link'
+
 import { BsInstagram, BsTwitter, BsFacebook } from 'react-icons/bs'
+import NewsletterSubcriptionForm from './NewsletterSubscriptionForm'
 
 const links = [
     { label: 'About', href: '/about' },
@@ -15,7 +17,8 @@ const socialLinks = [
 
 const Footer = () => {
     return (
-        <footer className="justify-center flex flex-col gap-12 h-fit px-5 pb-3 pt-24 bg-purple-900 text-white">
+        <footer className="relative justify-center flex flex-col gap-12 h-fit px-5 pb-3 pt-48 bg-purple-900 text-white">
+            <NewsletterSubcriptionForm />
             <div className="grid lg:grid-cols-3 grid-cols-1 w-full max-w-base mx-auto items-center lg:items-start lg:justify-between gap-12">
                 <section className="flex flex-col gap-2 items-center justify-center">
                     <h3>Cos</h3>

@@ -65,7 +65,7 @@ const BookCardWithAction: React.FC<BookCardWithActionProps> = ({
     }
 
     return (
-        <article className="flex flex-col gap-2 hover:shadow-lg rounded-lg">
+        <article className="flex flex-col gap-2 p-2 shadow-gray-300 shadow-xl border border-gray-100 hover:shadow-3xl hover:bg-gray-200 hover:scale-105 transition-all delay-50 duration-200 ease-in-out rounded-lg">
             <Link href={`/books/book/${id}`}>
                 <figure className="w-full flex justify-center">
                     <Image
