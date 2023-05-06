@@ -1,6 +1,8 @@
 import Image from 'next/image'
 import Link from 'next/link'
+import { useState } from 'react'
 
+import Pagination from '~/components/Pagination'
 import StateWrapper from '~/components/StateWrapper'
 import MainLayout from '~/layouts/MainLayout'
 import { type RouterOutputs, api } from '~/utils/api'
@@ -8,21 +10,42 @@ import formatDate from '~/utils/formatDate'
 import formatPrice from '~/utils/formatPrice'
 
 const MyOrdersPage = () => {
-    const ordersQuery = api.order.getMyOrders.useQuery()
+    const [page, setPage] = useState<number>(0)
+    const ordersPaginationQuery = api.order.ordersPagination.useQuery({
+        itemsPerPage: 3,
+        page,
+    })
 
     return (
         <MainLayout>
             <StateWrapper
-                data={ordersQuery.data}
-                isLoading={ordersQuery.isLoading}
-                isError={ordersQuery.isError}
+                data={ordersPaginationQuery.data}
+                isLoading={
+                    ordersPaginationQuery.isLoading ||
+                    ordersPaginationQuery.isFetching
+                }
+                isError={ordersPaginationQuery.isError}
                 NonEmpty={(data) => (
                     <div>
-                        <ul className="flex flex-col gap-5">
-                            {data.map((order) => (
+                        <Pagination
+                            totalPages={data.totalPages}
+                            goTo={(newPage) => {
+                                setPage(newPage)
+                            }}
+                            currentPageIndex={page}
+                        />
+                        <ul className="flex flex-col gap-5 my-5">
+                            {data?.orders.map((order) => (
                                 <Order key={order.id.toString()} {...order} />
                             ))}
                         </ul>
+                        <Pagination
+                            totalPages={data.totalPages}
+                            goTo={(newPage) => {
+                                setPage(newPage)
+                            }}
+                            currentPageIndex={page}
+                        />
                     </div>
                 )}
             />
@@ -30,9 +53,9 @@ const MyOrdersPage = () => {
     )
 }
 
-const Order: React.FC<RouterOutputs['order']['getMyOrders'][number]> = (
-    order,
-) => {
+const Order: React.FC<
+    RouterOutputs['order']['ordersPagination']['orders'][number]
+> = (order) => {
     return (
         <li className="grid grid-cols-2 gap-2 border border-gray-300 p-3">
             <ul>
@@ -71,7 +94,7 @@ const Order: React.FC<RouterOutputs['order']['getMyOrders'][number]> = (
 }
 
 const OrderItem: React.FC<
-    RouterOutputs['order']['getMyOrders'][number]['items'][number]
+    RouterOutputs['order']['ordersPagination']['orders'][number]['items'][number]
 > = (item) => {
     return (
         <li className="flex flex-row items-center gap-5">

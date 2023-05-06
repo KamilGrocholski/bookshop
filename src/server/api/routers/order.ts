@@ -19,6 +19,11 @@ export const paymentSchema = z.object({
     orderId: orderBase.id,
 })
 
+export const ordersPaginationSchema = z.object({
+    itemsPerPage: z.number().int().nonnegative(),
+    page: z.number().int().nonnegative(),
+})
+
 export const orderRouter = createTRPCRouter({
     make: protectedProcedure
         .input(makeOrderSchema)
@@ -176,21 +181,46 @@ export const orderRouter = createTRPCRouter({
                 },
             })
         }),
-    getMyOrders: protectedProcedure.query(({ ctx }) => {
-        return ctx.prisma.order.findMany({
-            orderBy: {
-                createdAt: 'desc',
-            },
-            where: {
-                userId: ctx.session.user.id,
-            },
-            include: {
-                items: {
-                    include: {
-                        book: true,
+    ordersPagination: protectedProcedure
+        .input(ordersPaginationSchema)
+        .query(async ({ ctx, input }) => {
+            const { itemsPerPage, page } = input
+
+            const ordersCount = await ctx.prisma.order.count({
+                where: {
+                    userId: ctx.session.user.id,
+                },
+            })
+
+            const orders = await ctx.prisma.order.findMany({
+                skip: page * itemsPerPage,
+                take: itemsPerPage,
+                orderBy: {
+                    createdAt: 'desc',
+                },
+                where: {
+                    userId: ctx.session.user.id,
+                },
+                include: {
+                    items: {
+                        include: {
+                            book: true,
+                        },
                     },
                 },
-            },
-        })
-    }),
+            })
+
+            if (!ordersCount) {
+                throw new TRPCError({ code: 'NOT_FOUND' })
+            }
+
+            if (!orders) {
+                throw new TRPCError({ code: 'NOT_FOUND' })
+            }
+
+            return {
+                orders,
+                totalPages: Math.round(ordersCount / itemsPerPage),
+            }
+        }),
 })

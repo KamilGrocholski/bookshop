@@ -1,6 +1,7 @@
 import Link from 'next/link'
-import { FiShoppingCart } from 'react-icons/fi'
 import { forwardRef, useRef, useState } from 'react'
+
+import { FiShoppingCart } from 'react-icons/fi'
 import { useAtom } from 'jotai'
 
 import BooksSearch from './BooksSearch'
@@ -36,12 +37,11 @@ const AccountMenu = forwardRef<
         >
             <ul className="flex flex-col gap-1 text-lg">
                 {accountMenuLinks.map((link) => (
-                    <li
-                        key={link.label}
-                        className="text-start p-2 hover:text-red-500"
-                    >
-                        <Link href={link.href}>{link.label}</Link>
-                    </li>
+                    <Link key={link.label} href={link.href}>
+                        <li className="text-start p-2 hover:text-red-500">
+                            {link.label}
+                        </li>
+                    </Link>
                 ))}
             </ul>
             <div>
@@ -83,11 +83,11 @@ const Header = () => {
                         )}
                         LoggedIn={(signOut, sessionData) => (
                             <div className="flex flex-row gap-2 items-center">
-                                <button
+                                <div
                                     onClick={() =>
                                         setIsMenuOpen((prev) => !prev)
                                     }
-                                    className="relative"
+                                    className="relative cursor-pointer"
                                 >
                                     Menu
                                     <ShouldRender if={isMenuOpen}>
@@ -97,7 +97,7 @@ const Header = () => {
                                             logout={signOut}
                                         />
                                     </ShouldRender>
-                                </button>
+                                </div>
                                 <Button
                                     onClick={() =>
                                         setIsCartOpen((prev) => !prev)

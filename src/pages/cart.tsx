@@ -1,4 +1,6 @@
 import Link from 'next/link'
+
+import Button from '~/components/Button'
 import CartItem from '~/components/Cart/CartItem'
 import StateWrapper from '~/components/StateWrapper'
 import MainLayout from '~/layouts/MainLayout'
@@ -22,7 +24,15 @@ const CartPage = () => {
                                 <span>Total: </span>
                                 <span>{formatPrice(data.totalPrice)}</span>
                             </div>
-                            <Link href="/order/creating">Payment</Link>
+                            <Link href="/order/creating">
+                                <Button
+                                    shape="square"
+                                    size="lg"
+                                    className="font-semibold"
+                                >
+                                    Payment
+                                </Button>
+                            </Link>
                         </div>
                         <div>
                             <ul>

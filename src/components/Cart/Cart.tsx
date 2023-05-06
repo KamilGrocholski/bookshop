@@ -7,11 +7,15 @@ import Button from '../Button'
 import formatPrice from '~/utils/formatPrice'
 import CartItem from './CartItem'
 import useCart from '~/hooks/useCart'
+import { useAtom } from 'jotai'
+import { isCartOpenAtom } from '~/atoms'
 
 const Cart = forwardRef<HTMLDivElement>((_, ref) => {
     const cartItemsQuery = api.cart.getCart.useQuery()
 
     const { resetCart } = useCart()
+
+    const [, setIsCartOpen] = useAtom(isCartOpenAtom)
 
     return (
         <div
@@ -51,7 +55,12 @@ const Cart = forwardRef<HTMLDivElement>((_, ref) => {
                                 <span className="font-semibold">Total:</span>
                                 <span>{formatPrice(data.totalPrice)}</span>
                                 <Button size="sm" className="font-bold">
-                                    <Link href="/cart">Checkout</Link>
+                                    <Link
+                                        onClick={() => setIsCartOpen(false)}
+                                        href="/cart"
+                                    >
+                                        Checkout
+                                    </Link>
                                 </Button>
                             </div>
                         </div>

@@ -1,6 +1,3 @@
-import { Book } from '@prisma/client'
-import { createServerSideHelpers } from '@trpc/react-query/server'
-import clsx from 'clsx'
 import {
     type GetStaticPaths,
     type GetStaticPropsContext,
@@ -10,7 +7,12 @@ import Head from 'next/head'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
+
+import { type Book } from '@prisma/client'
+import { createServerSideHelpers } from '@trpc/react-query/server'
+import clsx from 'clsx'
 import SuperJSON from 'superjson'
+
 import Button from '~/components/Button'
 import StateWrapper from '~/components/StateWrapper'
 import useCart from '~/hooks/useCart'
@@ -177,10 +179,11 @@ export default function BookPage(
                         <div className="grid grid-cols-1 mx-auto lg:grid-cols-3 gap-8">
                             <div className="col-span-1">
                                 <Image
-                                    width={250}
-                                    height={250}
+                                    width={300}
+                                    height={400}
                                     src={book.coverImageUrl}
                                     alt={book.title}
+                                    className="h-auto w-auto"
                                 />
                             </div>
                             <div className="col-span-2 flex flex-col gap-12">
@@ -266,16 +269,22 @@ const BookForm: React.FC<{
     book: Pick<Book, 'id' | 'title' | 'coverImageUrl' | 'stock'>
 }> = ({ book: { stock, id, title, coverImageUrl } }) => {
     const { add } = useCart()
+    const availabilityMessage = stock > 0 ? 'available' : 'not available'
 
     return (
-        <form onSubmit={() => add(id)}>
+        <form
+            onSubmit={(e) => {
+                e.preventDefault()
+                add(id)
+            }}
+        >
             <div
                 className={clsx(
                     'uppercase font-semibold',
                     stock > 0 ? 'text-teal-500' : 'text-red-500',
                 )}
             >
-                {stock > 0 ? 'available' : 'not available'}
+                {availabilityMessage}
             </div>
             <div className="flex gap-3">
                 <Button size="lg" type="submit">
